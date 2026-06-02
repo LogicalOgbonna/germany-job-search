@@ -28,19 +28,19 @@ npm install
 
 ```mermaid
 flowchart LR
-  A[cv/experience.md] --> B[/jobs]
-  B --> C[job_description.md]
-  C --> D[/cv]
-  D --> E[ogbonna_arinze_cv.html]
-  E --> F[generate_cv.mjs]
-  F --> G[ogbonna_arinze_cv.pdf]
-  D --> H[/cover]
-  H --> I[cover_letter.html]
-  I --> J[generate_cover_letter.mjs]
-  J --> K[cover_letter.pdf]
-  G --> L[/intro]
+  A["cv/experience.md"] --> B["/jobs"]
+  B --> C["job_description.md"]
+  C --> D["/cv"]
+  D --> E["ogbonna_arinze_cv.html"]
+  E --> F["generate_cv.mjs"]
+  F --> G["ogbonna_arinze_cv.pdf"]
+  D --> H["/cover"]
+  H --> I["cover_letter.html"]
+  I --> J["generate_cover_letter.mjs"]
+  J --> K["cover_letter.pdf"]
+  G --> L["/intro"]
   K --> L
-  L --> M[intro_prep.md]
+  L --> M["intro_prep.md"]
 ```
 
 
