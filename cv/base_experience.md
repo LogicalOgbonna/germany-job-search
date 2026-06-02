@@ -1,118 +1,187 @@
-# Skills & Experience Inventory
+# Verified Skills Inventory
+
+Every skill below has been used in production or in a shipped project. The "Where Used" column enables the /cv command to create truthful bullet points grounded in real work context.
 
 ## Programming Languages
-- TypeScript
-- JavaScript (ESNext)
-- Node.js
-- Python
-- PHP
+| Skill | Where Used |
+|-------|-----------|
+| TypeScript | Genentech, Descasio, OurNigeria |
+| JavaScript (ESNext) | All roles |
+| NodeJS | SureTrade, Founders Lair, OurNigeria |
+| Python | Personal projects |
+| PHP | Early career |
 
 ## Frontend Frameworks & Libraries
-- React
-- Next.js
-- Vue.js
+| Skill | Where Used |
+|-------|-----------|
+| React | All roles from ActivEdge onward |
+| Next.js | Genentech (RAG chat widget), OurNigeria (web, dashboard, landing) |
+| Vue.js | Genentech (maintained legacy app before migration to React) |
 
 ## State Management & Data Fetching
-- Redux
-- React Query
-- Zustand
-- Jotai
-- Fetch API / Axios
+| Skill | Where Used |
+|-------|-----------|
+| Redux / Redux Toolkit | ActivEdge (settlement solution), Genentech, Descasio |
+| React Query | Genentech |
+| Zustand | Used across multiple projects |
+| Jotai | Used when lightweight state management needed |
+| RxJS | ActivEdge (real-time data streaming) |
+| Axios | ActivEdge, multiple projects |
+| Fetch API | Multiple projects |
+
+## Backend & API
+| Skill | Where Used |
+|-------|-----------|
+| NestJS | OurNigeria (API, ingestion pipeline) |
+| REST APIs | SureTrade, Founders Lair, OurNigeria |
+| GraphQL | Genentech |
+| JWT Authentication | Genentech (frontend auth flows) |
+| SSO / Okta / SAML / OIDC | Genentech (enterprise SSO), Descasio (enterprise SSO) |
+| Role-Based Access Control (RBAC) | Genentech, OurNigeria |
+| WebSockets / SSE | OurNigeria (SSE streaming), ActivEdge (EventSource API), Personal project (WebSocket signaling for p2p chat app) |
+| WebRTC (DataChannels, signaling) | Personal project (p2p chat app, browser-to-browser data channels with WebSocket signaling) |
+
+## Databases & ORM
+| Skill | Where Used |
+|-------|-----------|
+| PostgreSQL | OurNigeria (with pgvector extension) |
+| MongoDB | SureTrade, Founders Lair |
+| Prisma | OurNigeria |
+| Redis | General knowledge, caching patterns |
+
+## AI & Large Language Models
+| Skill | Where Used |
+|-------|-----------|
+| OpenAI API | Genentech (RAG chat widget), OurNigeria (multi-agent pipeline) |
+| Anthropic Claude API | Genentech (RAG chat widget), OurNigeria (multi-agent pipeline), Personal projects |
+| LangChain | Genentech (RAG chat widget), Personal projects |
+| LangGraph | Genentech (RAG chat widget), OurNigeria (multi-agent pipeline), Personal projects |
+| Vercel AI SDK | Genentech (RAG chat widget) |
+| Mastra Framework | OurNigeria (multi-agent system: Router, Budget/Corruption/Impact Analysts) |
+| RAG (Retrieval-Augmented Generation) | Genentech, OurNigeria (hybrid search: pgvector + BM25 + RRF + Cohere reranking) |
+| Embeddings & Vector Search | OurNigeria (Voyage AI, 708K+ chunks, 1024-dim), Genentech (Chroma) |
+| Chroma | Genentech (RAG chat widget) |
+| Pinecone | Personal project |
+| Prompt Engineering | Genentech, OurNigeria |
+| Agentic Workflows | OurNigeria (multi-agent routing, intent classification, rerouting) |
+| Function Calling / Tool Use / Structured Outputs | Genentech (RAG widget), OurNigeria (multi-agent system), Personal projects |
+| Zod (LLM schemas, structured outputs) | Genentech (RAG widget), OurNigeria (multi-agent system), Personal projects |
+| ragas (RAG evaluation) | Genentech, OurNigeria |
+| DeepEval (LLM testing) | Genentech, OurNigeria |
 
 ## Styling & UI Components
-- Tailwind CSS
-- Radix UI
-- Custom Design Systems
+| Skill | Where Used |
+|-------|-----------|
+| Tailwind CSS | Genentech, OurNigeria |
+| Radix UI | Genentech (design system) |
+| Ant Design | ActivEdge |
+| Custom Design Systems | Genentech (React + Radix UI design system) |
+| Recharts | OurNigeria (22 chart types) |
+| react-chartjs | ActivEdge (data visualization dashboards) |
 
 ## Build Tools & Bundlers
-- Webpack
-- Vite
-- Rollup
-- Turborepo
-- Nx
+| Skill | Where Used |
+|-------|-----------|
+| Webpack | Descasio (bundle analysis, optimization) |
+| Vite | Multiple projects |
+| Rollup | Descasio (rollup-plugin-visualizer) |
+| Turborepo | Multiple projects |
+| Nx | OurNigeria (monorepo orchestration) |
 
 ## Testing & Automation
-- Jest
-- Cypress
-- Playwright
-- Allure Reports
+| Skill | Where Used |
+|-------|-----------|
+| Jest | Descasio |
+| Enzyme | Descasio |
+| Cypress | Multiple projects |
+| Playwright | Genentech (E2E in CI/CD), OurNigeria (E2E tests) |
+| Allure Reports | Genentech (test reporting on GitHub Pages) |
+| Storybook | Descasio (component documentation) |
 
 ## Cloud, Infrastructure & DevOps
-- AWS (CloudFront, S3)
-- Vercel
-- Docker
-- Docker Compose
-- Kafka
-- GitHub Actions
-- CI/CD Pipelines
-- DevOps Best Practices
+| Skill | Where Used |
+|-------|-----------|
+| AWS (CloudFront, S3) | Genentech, OurNigeria |
+| Vercel | Multiple projects |
+| Heroku | Founders Lair (API deployment) |
+| Docker / Docker Compose | OurNigeria (production deployment with health checks) |
+| GitHub Actions | Genentech (CI/CD), Descasio, OurNigeria |
+| CI/CD Pipelines | Founders Lair (Heroku/AWS), Genentech, OurNigeria |
+| pnpm | OurNigeria |
+| Infisical | OurNigeria (secrets management) |
 
 ## Observability, Profiling & Monitoring
-- Sentry
-- Datadog RUM
-- LogRocket
-- Lighthouse
-- Chrome DevTools
-- React Profiler
-- webpack-bundle-analyzer
-- rollup-plugin-visualizer
+| Skill | Where Used |
+|-------|-----------|
+| Sentry | Multiple projects |
+| Datadog RUM | Multiple projects |
+| LogRocket | Multiple projects |
+| Lighthouse | Genentech, Descasio (performance auditing) |
+| Chrome DevTools | Genentech, Descasio |
+| React Profiler | Descasio (render bottleneck profiling) |
+| webpack-bundle-analyzer | Descasio |
+| rollup-plugin-visualizer | Descasio |
+| Langfuse | OurNigeria (LLM observability) |
+| LangSmith | Genentech (RAG observability), OurNigeria (LLM tracing alongside Langfuse) |
+| OpenTelemetry (OTel) | Genentech, OurNigeria (LLM + app tracing exporters) |
 
 ## Code Quality & Tooling
-- ESLint
-- Prettier
-- Husky
-- Lint-staged
-- Storybook
-- Figma
-
-## API & Integrations
-- GraphQL
-- REST
-- JWT Authentication
-- Role-Based Access Control (RBAC)
-
-## AI & Large Language Models (LLMs)
-- LangChain
-- Vercel AI SDK
-- Mastra
-- Prompt Engineering & LLM Integration
-- Embeddings & Vector Search (Chroma, Pinecone, Weaviate, etc.)
-- Retrieval-Augmented Generation (RAG) Strategies
-- Agentic Workflows
-- OpenAI API / Anthropic API / Open-source Models
+| Skill | Where Used |
+|-------|-----------|
+| ESLint | Descasio, OurNigeria |
+| Prettier | Descasio |
+| Husky | Descasio |
+| Lint-staged | Descasio |
+| Figma | Multiple projects (design-to-code workflows) |
 
 ## Web Core Concepts & Architecture
-- Micro-frontends
-- Monorepos (Turborepo, Nx, PNPM)
-- Server-Side Rendering (SSR) & Static Site Generation (SSG)
-- Progressive Web Apps (PWA) & Service Workers
-- WebSockets & Real-time Communication
-- Accessibility (WCAG, ARIA)
-- SEO & Core Web Vitals Optimization
-- Edge Computing
+| Skill | Where Used |
+|-------|-----------|
+| Micro-frontends | Architecture knowledge, applied in large projects |
+| Monorepos (Nx, pnpm) | OurNigeria |
+| Server-Side Rendering (SSR) | OurNigeria (public conversation pages) |
+| Static Site Generation (SSG) | Multiple Next.js projects |
+| Progressive Web Apps (PWA) | General knowledge |
+| Real-time Communication (SSE, EventSource) | OurNigeria (SSE streaming), ActivEdge (EventSource API) |
+| Accessibility (WCAG, ARIA) | Genentech (design system) |
+| SEO & Core Web Vitals | OurNigeria (Open Graph, JSON-LD, slug URLs), Genentech |
 
-## Databases & Caching
-- SQL Databases (PostgreSQL)
-- NoSQL Databases (MongoDB)
-- Redis
-- Prisma / Drizzle ORM
+## Data Visualization
+| Skill | Where Used |
+|-------|-----------|
+| Recharts | OurNigeria (22 chart types inline in chat) |
+| react-chartjs | ActivEdge (settlement dashboards) |
+| D3.js concepts | Applied via charting libraries |
 
 ## Methodologies & Leadership
-- Agile / Scrum / Kanban
-- Test-Driven Development (TDD) / Behavior-Driven Development (BDD)
-- Technical Direction & Architecture Reviews
-- Mentorship & Code Reviews
-- Project Management
-- Product Mindset & Product Thinking
+| Skill | Where Used |
+|-------|-----------|
+| Agile / Scrum / Kanban | All roles |
+| TDD / BDD | Descasio (Jest/Enzyme), Genentech (Playwright) |
+| Technical Architecture Reviews | Genentech, OurNigeria |
+| Mentorship & Code Reviews | Genentech (2 interns), Founders Lair (2 interns), Descasio |
+| Product Mindset | OurNigeria (full product ownership) |
+
+## Workflow Orchestration & Background Jobs
+| Skill | Where Used |
+|-------|-----------|
+| Inngest | OurNigeria (durable background jobs, agent workflows) |
+| Temporal | OurNigeria (durable execution) |
+| Trigger.dev | OurNigeria (scheduled / event-driven jobs) |
+| Human-in-the-loop patterns | OurNigeria (LangGraph state machines with HITL checkpoints) |
+
+## Security, Privacy & Compliance
+| Skill | Where Used |
+|-------|-----------|
+| PII / GDPR data handling | Genentech (clinical trial / patient data), OurNigeria (NDPR / user PII), ActivEdge (financial PII), Descasio (customer data) |
+| Data retention & redaction | Genentech, OurNigeria |
+| Secrets management (Infisical) | OurNigeria |
 
 ## Sectors & Industries
-- Healthcare / Clinical Trials (Clinical Trial Data Platforms)
-- Enterprise B2B (Data-heavy Dashboards)
-- Consulting (Consulting Projects)
-- SaaS (SaaS Products)
-- E-Commerce (E-Commerce Platforms)
-- Marketplace (Marketplace Platforms)
-- Logistics (Logistics Platforms)
-- Finance (Finance Platforms)
-- Education (Education Platforms)
-- Non-Profit (Non-Profit Platforms)
+| Sector | Where |
+|--------|-------|
+| Healthcare / Clinical Trials | Genentech (clinical trial data platform) |
+| Finance / Banking | ActivEdge (bank settlement solution, reconciliation) |
+| EdTech | SureTrade (school management portal) |
+| Civic Tech / GovTech | OurNigeria (budget transparency, corruption tracking) |
+| AI / LLM Products | Genentech (RAG widget), OurNigeria (multi-agent platform) |

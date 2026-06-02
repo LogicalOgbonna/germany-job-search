@@ -1,0 +1,14 @@
+- **Job Title**: Senior Full-Stack Engineer (Berlin)
+- **Company Intelligence**: Kadmos is a Berlin-based startup founded in 2021 by MIT graduates on an ambitious mission to revolutionise salary payments to migrant workers in the shipping industry. They bring fintech, low margins, and transparent FX to industries riddled with opaque mark-ups. Backed by renowned VCs Addition and Atlantic Labs, they have raised over $39 million. They are building secure, reliable, and scalable financial solutions.
+- **Direct Application Link**: https://job-boards.eu.greenhouse.io/kadmos3/jobs/4700215101
+- **Work Model & Location**: Berlin (with flexible WFH policy).
+- **The Role (Job Description)**: Take ownership of crucial engineering activities as a regulated salary payment provider. Develop and maintain core backend systems and frontend applications, build reusable libraries, implement complex financial components, and integrate with external service providers. Shape both the backend infrastructure and frontend experience of the platform, driving innovation in a highly regulated environment.
+- **The Ideal Candidate**: 
+  - 5+ years of professional experience in full-stack development with Java Spring Boot and React.
+  - Master’s degree in Computer Science, Mathematics, or Physics.
+  - Backend Proficiency: Expertise in Java with strong knowledge of Spring Boot and modern frameworks, SDKs, API standards, and libraries.
+  - Frontend Proficiency: Expertise in React with a strong emphasis on TypeScript. Experience with Redux, React Query, styled-components, MUI Component Library, or similar tech stack.
+  - Solid experience with unit, integration, and performance testing (JUnit, Spock, Testcontainers on the backend; React Testing Library and Cypress on the frontend).
+  - Strong understanding of building secure, reliable, and scalable systems in a regulated or financial services context.
+  - Fluency in English.
+- **Application Strategy & Intel**: Apply via Greenhouse. The application requires a Resume/CV (PDF/Doc) and optionally a Cover Letter. They ask for salary expectations and EU work authorization status. They offer an attractive compensation, free lunch at the office, and the latest equipment.

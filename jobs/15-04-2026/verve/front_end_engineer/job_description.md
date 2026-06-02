@@ -1,0 +1,27 @@
+# Elite Briefing: Front End Engineer at Verve
+
+- **Job Title**: Front End Engineer
+- **Company Intelligence**: Verve is a global adtech company focused on privacy-first advertising infrastructure, with a broad ecosystem spanning advertisers, publishers, data, and media technology. The business has real scale, including 30 offices globally, relationships with over 90 of the top 100 U.S. advertisers, and a major retail media footprint in Germany. This specific team, Verve Retail Media, is building one of Germany's most advanced in-store retail media platforms across 2,200+ stores and has grown extremely quickly, which suggests both strong momentum and meaningful execution pressure.
+- **Direct Application Link**: https://vervegroup.recruitee.com/o/front-end-engineer
+- **Work Model & Location**: Germany, with roles listed in Berlin and Dortmund.
+- **The Role (Job Description)**:
+  - Build the user-facing applications for Verve's Retail Media Platform.
+  - Own end-to-end implementation of frontend features that bridge complex adtech workflows and intuitive UX.
+  - Translate Figma concepts into production-ready interfaces.
+  - Build campaign management, targeting, and data visualization capabilities.
+  - Contribute to the internal design system and frontend consistency across products.
+  - Work closely with design, product, and backend in a highly collaborative product team.
+- **The Ideal Candidate**:
+  - 3-5+ years of frontend engineering experience.
+  - Strong JavaScript/TypeScript, HTML, and CSS foundations.
+  - Strong React and Next.js experience.
+  - Bonus points for Tailwind CSS and shadcn/ui.
+  - Good design sensitivity and the ability to think about UX, not just implementation.
+  - Familiarity with agile delivery, automated testing, and CI/CD workflows.
+- **Application Strategy & Intel**:
+  - Apply with CV; no explicit deadline is shown.
+  - This role is unusually strong for someone who likes product-facing frontend work with visual polish and real business complexity.
+  - Tailor toward React, Next.js App Router, TypeScript, data-heavy UI, design-system work, and close collaboration with product/design.
+  - If you have worked on dashboards, campaign tools, internal platforms, or data visualization, surface that immediately.
+  - The company explicitly mentions GenAI tools like Cursor and LLMs, so practical AI-assisted development fluency may strengthen your application.
+  - Benefits in Germany include pension support, a flexible benefits budget, training budget, language classes, and generous time off.

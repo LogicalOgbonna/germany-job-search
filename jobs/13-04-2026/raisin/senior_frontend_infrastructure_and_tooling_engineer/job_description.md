@@ -1,0 +1,29 @@
+# Elite Briefing: (Senior) Frontend Infrastructure & Tooling Engineer at Raisin
+
+- **Job Title**: (Senior) Frontend Infrastructure & Tooling Engineer (m/f/d)
+- **Company Intelligence**: Raisin is the world's leading platform for savings and investment products, founded in 2012. It connects consumers with banks in the EU, UK, and US, offering better interest rates and diversified refinancing. They hold over 80 billion euros in assets from over one million investors. They employ over 800 people from 75+ countries. Their engineering culture emphasizes platform engineering, automation, and continuous delivery, aiming to keep product teams highly productive.
+- **Direct Application Link**: https://job-boards.eu.greenhouse.io/raisin/jobs/4724273101
+- **Work Model & Location**: Berlin, Germany (Likely Hybrid/On-site, with flexible working hours and home office options).
+- **The Role (Job Description)**: 
+  - Optimize Frontend applications for performance and scalability.
+  - Drive internal platform efforts, improving development tools and the Frontend ecosystem.
+  - Build development infrastructure for stream-aligned teams and automate processes.
+  - Research, assess, and maintain new technology solutions for the Frontend Platform.
+  - Own, maintain, and continuously evolve a large-scale Frontend monorepo.
+  - Scale the shared CI pipeline to improve build performance and developer productivity.
+  - Act as a "Frontend First Aid" to unblock engineers on infrastructure and build-related issues.
+  - Drive architectural decisions and shape the evolution of the Frontend platform.
+- **The Ideal Candidate**: 
+  - 3+ years of experience as a Frontend or Full Stack engineer.
+  - Proficiency in TypeScript, JavaScript, CSS, and HTML.
+  - Strong experience with React or similar frameworks.
+  - Familiarity with CSS-in-JS (e.g., styled-components).
+  - Experience with Next.js, SSG, JAM-Stack, Headless CMS, and Material-UI is a huge plus.
+  - Hands-on experience with micro-frontend architecture and monorepo setups.
+  - Strong understanding of Frontend build tools (Webpack, Rollup, Babel) and automated testing (Jest).
+  - Passion for Platform Engineering and modern CI/CD automation for Frontend.
+  - Excellent English communication skills.
+- **Application Strategy & Intel**: 
+  - Application requires Resume/CV. Cover Letter is optional but recommended to stand out.
+  - Needs to specify salary expectation in local currency (EUR) and earliest start date.
+  - Emphasize experience with monorepos, CI/CD pipelines, and developer experience (DX) improvements in the application.

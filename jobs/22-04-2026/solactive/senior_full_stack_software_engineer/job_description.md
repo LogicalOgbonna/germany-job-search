@@ -1,0 +1,12 @@
+- **Job Title**: Senior Full-Stack Software Engineer (f/m/d) – User Interfaces Platform Team
+- **Company Intelligence**: Solactive AG is a FinTech company, developing multi-asset-class index solutions for ETFs and other index-linked products. Founded in 2007, it has evolved into one of the world’s most important and fastest-growing index providers. Headquartered in Frankfurt, they power global investment products. They have a modern, flat hierarchy and startup-like culture within a fast-growing, dynamic environment.
+- **Direct Application Link**: https://de.talent.com/view?id=4d3b9100240e
+- **Work Model & Location**: Hybrid work model in Berlin, Germany.
+- **The Role (Job Description)**: The User Interfaces Team defines, implements, and maintains the Design System and UI framework used across Solactive. You will lead the development and maintenance of Solactive’s public webpage using a modern tech stack (Strapi, Astro, Vite) as well as other client-facing applications. You will design and implement flexible, scalable UI architectures, collaborate with backend, DevOps, and business teams, and support full-stack development tasks utilizing knowledge in Java, Go, and Python as needed.
+- **The Ideal Candidate**: 
+  - Deep Expertise in React: Proven track record of designing, building, and scaling complex front-end applications using React.
+  - UI Framework Maintenance: Experienced in maintaining a UI framework or design system.
+  - Architecture Design: Ability to design flexible, scalable UI architectures.
+  - Full-stack proficiency: Strong understanding of back-end development concepts and technologies (Java, Go, Python) to collaborate effectively with back-end teams.
+  - Problem-Solving Mindset and strong communication skills for collaboration and mentorship.
+- **Application Strategy & Intel**: Apply via Talent.com. The role offers 30 annual vacation days plus extra time off for Christmas Eve and New Year, a job ticket, access to Corporate Benefits, and a flexible work culture. No specific deadline mentioned.

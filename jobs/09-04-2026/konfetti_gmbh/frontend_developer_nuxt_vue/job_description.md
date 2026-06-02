@@ -1,0 +1,7 @@
+- **Job Title**: Frontend Developer - Nuxt/Vue (m/f/x)
+- **Company Intelligence**: konfetti is a booking platform and software for local workshops and experiences, founded in April 2021. They work with over 2,500 providers and offer over 12,000 workshops in Germany, Austria, and online.
+- **Direct Application Link**: https://join.com/companies/gokonfetti/15946739-frontend-developer-nuxt-vue-m-f-x-in-berlin
+- **Work Model & Location**: Berlin
+- **The Role (Job Description)**: Work on two frontends: customer-facing application and partner-facing backoffice. Collaborate with engineers, designers, and product leads. Communicate proactively, think critically about requirements, and propose technical solutions. Improve system performance, enhance monitoring, and address technical debt. Use AI-assisted development tools.
+- **The Ideal Candidate**: Solid front-end experience with Nuxt and Vue.js. Good understanding of agile development. Knowledge in end-to-end development including automated testing, monitoring, performance optimization, and continuous delivery. Interest in AI-assisted development tools.
+- **Application Strategy & Intel**: Apply via Join.com. Upload resume, references, and a short cover letter in one file (max 20 MB). Emphasize Nuxt/Vue.js experience, proactive communication, and familiarity with AI-assisted development.

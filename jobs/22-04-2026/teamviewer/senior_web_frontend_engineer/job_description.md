@@ -1,0 +1,14 @@
+- **Job Title**: Senior Web Frontend Engineer (all genders)
+- **Company Intelligence**: TeamViewer provides a leading Digital Workplace platform that connects people with technology—enabling, improving and automating digital processes. Their software solutions harness the power of AI and shape the future of digitalization. They have over 1,900 employees worldwide and serve hundreds of millions of users and around 645,000 customers across all industries. They have a strong company culture valuing diversity, with open door policies, frequent all-hands, and leadership lunches.
+- **Direct Application Link**: https://teamviewer.teamtailor.com/jobs/7103562-senior-web-frontend-engineer-all-genders
+- **Work Model & Location**: Hybrid (up to 50% home office) in Berlin/Ioannina. Includes a "Work From Abroad Program" allowing up to 40 days of work outside the contracting country.
+- **The Role (Job Description)**: Lead the frontend development of new web applications. Design and implement high-performance, maintainable, and reusable UI components. Drive the migration to modern tech stacks and architect scalable features for React applications. Bring excellent technical skills in visualizing complex data sets. Ensure best practices in front-end architecture, code quality, accessibility, and testing. Participate in code reviews, technical discussions, and mentorship of developers. Continuously research and advocate for improvements in performance, scalability, and developer experience.
+- **The Ideal Candidate**: 
+  - A completed university or college degree in Computer Science, IT, or related subject.
+  - At least 5+ years of professional experience with JavaScript and/or TypeScript.
+  - Deep knowledge of modern frontend frameworks (React is preferred, but Angular or Vue experience is welcome) and a strong background in testing.
+  - Proven experience with component-based architecture, state management (e.g., Redux, Zustand, or Recoil), and REST/GraphQL integration.
+  - Strong attention to detail with a focus on performance optimization, responsive design, and cross-browser compatibility.
+  - Fluency in English is mandatory; further languages are a plus.
+  - Team-player mentality.
+- **Application Strategy & Intel**: Apply directly via the Teamtailor link. No specific deadline mentioned. They offer a great compensation package including company achievement bonus or sales bonus, company stocks, and regular salary reviews. They also top up premiums for the private pension plan (BAV) up to the maximum amount.

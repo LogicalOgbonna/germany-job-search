@@ -1,0 +1,7 @@
+- **Job Title**: Frontend Developer (f/m/d)
+- **Company Intelligence**: OH-SO Digital is a growing, AI-native agency redefining how brands work with creativity and technology. Powered by WPP, founded in 2024 in Hamburg, employing around 50 people across offices in Berlin, Prague, and Munich. Clients include Audi, Volkswagen, Otto, TÜV Rheinland, and PowerCo.
+- **Direct Application Link**: https://oh-so.jobs.personio.com/job/2222934?language=en
+- **Work Model & Location**: Berlin
+- **The Role (Job Description)**: Develop scalable, efficient frontend components using React/Next.js. Collaborate with UX/UI designers. Work with clients and business teams to refine needs and translate them into requirements. Ensure seamless functionality across devices/browsers. Partner with backend developers to integrate APIs. Participate in code reviews and mentor team members.
+- **The Ideal Candidate**: 5–7 years of frontend development experience, ideally with team leadership potential. Strong proficiency in HTML, CSS, TypeScript, and modern frameworks (React/Next.js). Experience integrating RESTful APIs. Familiarity with cloud platforms (AWS, GCP, Azure, Vercel), containerization (Docker, Kubernetes), and infrastructure-as-code (Terraform). Solid grasp of CI/CD methodologies.
+- **Application Strategy & Intel**: Apply directly via the Personio portal. Emphasize your React/Next.js and TypeScript skills, along with any cloud/DevOps experience (Docker, Vercel, CI/CD). Highlight your ability to work directly with clients and mentor team members.

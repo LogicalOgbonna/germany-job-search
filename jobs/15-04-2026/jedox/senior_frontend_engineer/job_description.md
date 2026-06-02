@@ -1,0 +1,27 @@
+# Elite Briefing: Senior Frontend Engineer at Jedox
+
+- **Job Title**: Senior Frontend Engineer
+- **Company Intelligence**: Jedox is a mature German software company in enterprise performance management, planning, and FP&A, with a global customer base and a strong position in financial planning software. The business has been backed by major growth investors, has won repeated Gartner recognition, and sits in the category of serious B2B infrastructure software rather than early-stage startup risk. This role is attractive if you want frontend ownership in a stable but still growth-oriented enterprise SaaS environment.
+- **Direct Application Link**: https://jedox.jobs.personio.de/job/2520360?language=en
+- **Work Model & Location**: Germany remote, full-time, permanent.
+- **The Role (Job Description)**:
+  - Design, build, and maintain scalable, cloud-ready web applications using React and TypeScript.
+  - Work within micro-frontend architecture and help shape frontend system integrations.
+  - Drive code quality, testing, deployment automation, and CI/CD improvements.
+  - Collaborate cross-functionally with product management, UX/UI, QA, and other engineering stakeholders.
+  - Mentor more junior frontend engineers and participate in broader technical initiatives.
+  - Contribute to architectural decisions for scalable, maintainable frontend systems.
+- **The Ideal Candidate**:
+  - 8+ years of frontend or fullstack engineering experience.
+  - Strong React, TypeScript/JavaScript, HTML, CSS, and responsive design skills.
+  - Experience with scalable micro-frontend or cloud-ready application architecture.
+  - Strong testing discipline and clean-code orientation.
+  - Familiarity with CI/CD tooling such as GitHub Actions, Jenkins, SonarQube, and ArgoCD.
+  - Comfortable in agile environments and in stakeholder-heavy product settings.
+- **Application Strategy & Intel**:
+  - Apply with CV; no published deadline is shown.
+  - This role is best positioned for someone who wants senior frontend scope with architectural weight, mentorship, and enterprise-grade delivery standards.
+  - Tailor toward React platform work, frontend architecture, cloud-ready apps, CI/CD improvements, and collaboration across product, QA, and design.
+  - If you have experience modernizing legacy frontend systems or rolling out shared platform components, highlight that.
+  - Jedox explicitly mentions AI-assisted recruiting support, but also states applications are reviewed by people.
+  - The company appears to value stability, clarity, and team maturity more than startup-style speed theater.

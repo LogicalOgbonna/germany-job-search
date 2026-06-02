@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arinze Ogbonna - CV</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; line-height: 1.3; color: #000; padding: 36px 46px; max-width: 850px; margin: 0 auto; }
+    h1 { font-size: 22pt; font-weight: bold; text-align: center; margin-bottom: 2px; }
+    .contact { text-align: center; font-size: 10pt; margin-bottom: 10px; }
+    .contact a { color: #0563C1; text-decoration: underline; }
+    h2 { font-size: 10.5pt; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 2px; margin-top: 12px; margin-bottom: 5px; }
+    .summary { margin-bottom: 3px; text-align: justify; }
+    .competencies { margin-bottom: 3px; }
+    .competency-item { margin-bottom: 2px; padding-left: 16px; position: relative; }
+    .competency-item::before { content: "\2022"; position: absolute; left: 4px; top: 0; }
+    .competency-item strong { font-weight: bold; }
+    .job-header { display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px; margin-bottom: 0; }
+    .company { font-weight: bold; font-size: 10.5pt; }
+    .location { font-size: 10pt; text-align: right; }
+    .title-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+    .job-title { font-style: italic; font-weight: bold; font-size: 10pt; }
+    .dates { font-style: italic; font-size: 10pt; text-align: right; }
+    ul { margin-left: 16px; margin-bottom: 4px; }
+    li { margin-bottom: 3px; text-align: justify; }
+    li strong { font-weight: bold; }
+    .education-header { display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px; }
+    .edu-school { font-weight: bold; font-size: 10.5pt; }
+    .edu-location { font-size: 10pt; }
+    .edu-detail { display: flex; justify-content: space-between; align-items: baseline; }
+    .edu-degree { font-style: italic; font-size: 10pt; }
+    .edu-date { font-style: italic; font-size: 10pt; }
+    .project-header { display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px; margin-bottom: 0; }
+    .project-name { font-weight: bold; font-size: 10.5pt; }
+    .project-link { font-size: 10pt; text-align: right; }
+    .project-link a { color: #0563C1; text-decoration: underline; }
+    .project-title-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+    .project-desc { font-style: italic; font-size: 10pt; margin-bottom: 3px; }
+  </style>
+</head>
+<body>
+
+  <h1>Arinze Ogbonna</h1>
+  <div class="contact">
+    <a href="mailto:arinzeogbo@gmail.com">arinzeogbo@gmail.com</a> |
+    <a href="https://linkedin.com/in/arinze-ogbonna">linkedin.com/in/arinze-ogbonna</a>
+  </div>
+
+  <h2>Summary</h2>
+  <p class="summary">
+    Fullstack Software Engineer with 8 years of experience building high-performance web applications and data-intensive systems across healthcare, fintech, and civic tech. Advanced proficiency in TypeScript, Node.js, React, and Next.js, with hands-on experience in observability tooling, real-time data streaming, performance profiling, and large-scale data processing. Proven track record of building scalable web services, monitoring dashboards, and CI/CD pipelines, with a focus on application performance, developer experience, and production reliability.
+  </p>
+
+  <h2>Core Competencies</h2>
+  <div class="competencies">
+    <div class="competency-item"><strong>Frontend &amp; Frameworks:</strong> React, Next.js, TypeScript, Vue.js, Redux, Zustand, React Query, and SSR/SSG/ISR.</div>
+    <div class="competency-item"><strong>Performance &amp; Observability:</strong> Lighthouse, Core Web Vitals, React Profiler, bundle analysis (webpack/rollup), Sentry, Datadog RUM, Langfuse, and Allure Reports.</div>
+    <div class="competency-item"><strong>Backend &amp; Data:</strong> NodeJS, NestJS, REST APIs, GraphQL, PostgreSQL (pgvector), MongoDB, Prisma, and JWT authentication.</div>
+    <div class="competency-item"><strong>Real-Time &amp; Streaming:</strong> SSE streaming, EventSource API, WebSockets, keepalive heartbeats, and real-time data processing.</div>
+    <div class="competency-item"><strong>Data Visualization:</strong> Recharts (22 chart types), react-chartjs, dynamic dashboards, and interactive data UIs.</div>
+    <div class="competency-item"><strong>Cloud &amp; DevOps:</strong> AWS (CloudFront, S3), Vercel, Docker, GitHub Actions, CI/CD pipelines, and Nx monorepo orchestration.</div>
+    <div class="competency-item"><strong>Testing &amp; Quality:</strong> Playwright, Jest, Cypress, Storybook, ESLint, Prettier, and CI-driven QA.</div>
+  </div>
+
+  <h2>Work Experience</h2>
+
+  <!-- Genentech -->
+  <div class="job-header">
+    <span class="company">Genentech (Roche)</span>
+    <span class="location">San Francisco, CA (Remote)</span>
+  </div>
+  <div class="title-row">
+    <span class="job-title">Frontend Engineer</span>
+    <span class="dates">May 2023 - Present</span>
+  </div>
+  <ul>
+    <li>Spearheaded the redesign of the main clinical trial data product, migrating from a Vue.js web application to a React Chrome extension, optimizing workflows for clinical site integrations and enhancing user adoption.</li>
+    <li>Optimized application performance by implementing lazy loading, code splitting, dynamic imports, and CDN asset delivery, reducing load times significantly as measured via Lighthouse and Chrome DevTools profiling.</li>
+    <li>Co-developed a full-stack Next.js chat widget powered by a RAG system using OpenAI GPT models, LangChain, Vercel AI SDK, and Chroma vector database, enabling users to query their data in real time via a conversational interface.</li>
+    <li>Introduced Redux for state management and React Query for request caching, refactoring legacy class components to functional components and streamlining data flow across the application.</li>
+    <li>Increased release reliability by integrating Playwright end-to-end tests into the CI/CD pipeline, automating reporting with Allure Reports on GitHub Pages and configuring Slack notifications for build quality visibility.</li>
+    <li>Implemented JWT-based authentication and role-based access control in Next.js with TypeScript and React Query, using HTTP-only cookies for secure token handling and permission-based UI rendering.</li>
+    <li>Architected a reusable design system in React and Radix UI with Tailwind CSS, improving UI consistency, accessibility (WCAG), and developer velocity across multiple product teams.</li>
+    <li>Mentored a team of two junior developers (interns), fostering a culture of technical excellence and code quality.</li>
+  </ul>
+
+  <!-- Descasio -->
+  <div class="job-header">
+    <span class="company">Descasio</span>
+    <span class="location">Lagos, Nigeria (Hybrid)</span>
+  </div>
+  <div class="title-row">
+    <span class="job-title">Senior Frontend Developer</span>
+    <span class="dates">May 2021 - Mar 2023</span>
+  </div>
+  <ul>
+    <li>Optimized frontend performance by profiling render bottlenecks with React Profiler and Lighthouse, reducing bundle size by 30-40% through rollup-plugin-visualizer and webpack-bundle-analyzer, achieving a 35% faster load time.</li>
+    <li>Led the design and implementation of an intuitive React user interface, achieving a 25% boost in user engagement and collaborating with architects to create a scalable frontend architecture that accelerated development by 30%.</li>
+    <li>Drove a 40% improvement in application performance by optimizing caching mechanisms across the React application.</li>
+    <li>Enhanced development workflow by introducing Jest and Enzyme testing frameworks, leading to a 20% decrease in bug reports.</li>
+    <li>Established engineering standards using ESLint, Prettier, Husky, Lint-staged, and GitHub Actions, reducing errors and accelerating CI/CD processes.</li>
+    <li>Mentored junior engineers on frontend best practices, fostering high-quality, maintainable code across projects.</li>
+  </ul>
+
+  <!-- ActivEdge -->
+  <div class="job-header">
+    <span class="company">ActivEdge Technologies</span>
+    <span class="location">Lagos, Nigeria</span>
+  </div>
+  <div class="title-row">
+    <span class="job-title">Senior React Developer</span>
+    <span class="dates">Oct 2019 - Sep 2021</span>
+  </div>
+  <ul>
+    <li>Built a high-volume bank Settlement Solution in a team of 3, handling thousands to millions of daily transactions and boosting settlement rates by 80%.</li>
+    <li>Adopted the native EventSource API for real-time data streaming, replacing socket.io for faster updates and a more responsive interface, processing high-frequency transaction data.</li>
+    <li>Built dynamic data visualization dashboards using React and react-chartjs with Redux Toolkit and Ant Design, enabling real-time monitoring of transaction flows and settlement statuses.</li>
+    <li>Developed critical payment modules (MasterCard, VISA, Express-cash, E-commerce) using React, Redux, RxJS, and Axios.</li>
+    <li>Built a real-time account reconciliation solution, boosting daily reconciliation by 60% through innovative transaction processing strategies.</li>
+  </ul>
+
+  <!-- Founders Lair -->
+  <div class="job-header">
+    <span class="company">Founders Lair</span>
+    <span class="location">Beijing, China (Remote)</span>
+  </div>
+  <div class="title-row">
+    <span class="job-title">Full Stack Engineer (Contract)</span>
+    <span class="dates">Oct 2020 - Feb 2021</span>
+  </div>
+  <ul>
+    <li>Developed NodeJS RESTful APIs and translated business requirements into efficient MongoDB database models and schemas.</li>
+    <li>Transformed Figma designs into reusable React components and engineered a CI/CD pipeline for automated deployment to Heroku and AWS.</li>
+    <li>Mentored two interns through frontend and backend projects, providing technical guidance and task management.</li>
+  </ul>
+
+  <!-- SureTrade -->
+  <div class="job-header">
+    <span class="company">SureTrade Business Solutions</span>
+    <span class="location">Nigeria</span>
+  </div>
+  <div class="title-row">
+    <span class="job-title">Frontend Developer</span>
+    <span class="dates">Mar 2018 - Oct 2019</span>
+  </div>
+  <ul>
+    <li>Designed MongoDB database schemas and implemented server-side logic in NodeJS, building and testing REST API endpoints for multiple client-facing applications.</li>
+    <li>Developed SureEdu, a school management portal in a team of 5, handling staff payroll and attendance tracking, student records (exams, reports, attendance), and guardian communications.</li>
+    <li>Responsible for full-stack integration, connecting the JavaScript frontend to NodeJS backend services, and devised comprehensive documentation for each application.</li>
+  </ul>
+
+  <h2>Projects</h2>
+
+  <!-- OurNigeria -->
+  <div class="project-header">
+    <span class="project-name">OurNigeria</span>
+    <span class="project-link"><a href="https://ournigeria.ng">ournigeria.ng</a></span>
+  </div>
+  <div class="project-title-row">
+    <span class="job-title">Senior Engineer</span>
+    <span class="dates">Feb 2026 - Present</span>
+  </div>
+  <ul>
+    <li>Architected the entire platform as an Nx monorepo managing 6 applications: NestJS API backend, Next.js citizen-facing web app (22 chart types with Recharts), Next.js admin dashboard, NestJS document ingestion pipeline, Next.js marketing landing page, and a Remotion video generation service.</li>
+    <li>Built a hybrid RAG pipeline combining pgvector similarity search with BM25 full-text search, merged via Reciprocal Rank Fusion (K=60), with Cohere reranking and Voyage AI embeddings (1024-dim, 708K+ chunks across 4 vector indexes), processing 700+ documents across 37 states.</li>
+    <li>Implemented SSE streaming for real-time chat responses with keepalive heartbeats every 15s to prevent reverse proxy timeouts, token-budgeted context management (summary + recent messages + user profile), and conversation summarization.</li>
+    <li>Integrated Langfuse for LLM observability and scoring, enabling real-time monitoring of AI pipeline performance, token usage, and response quality across all agents.</li>
+    <li>Configured CI/CD with GitHub Actions for automated builds and Docker Compose production deployment with multi-stage Dockerfiles, health checks, memory limits (API 1GB, Ingest 4GB, Postgres 2GB), and Playwright E2E tests across 4 test projects.</li>
+  </ul>
+
+  <h2>Education</h2>
+  <div class="education-header">
+    <span class="edu-school">University of Nigeria</span>
+    <span class="edu-location">Nsukka, Enugu</span>
+  </div>
+  <div class="edu-detail">
+    <span class="edu-degree">BSc Computer Science - 4.1 CGPA</span>
+    <span class="edu-date">Sep 2019</span>
+  </div>
+
+</body>
+</html>

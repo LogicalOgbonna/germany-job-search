@@ -1,3 +1,4 @@
 node_modules
 .env
-jobs/
+.DS_Store
+.o11y/

@@ -1,0 +1,13 @@
+- **Job Title**: Frontend Software Engineer
+- **Company Intelligence**: QuantCo turns advances at the frontier of artificial intelligence and statistical learning into real-world impact in globally leading enterprises. Started by 4 PhDs from Harvard and Stanford, they are now more than 180 professionals with extensive quantitative, engineering, and business experience. Their solutions include algorithmic pricing, data-driven claims management, and high-dimensional forecasting systems.
+- **Direct Application Link**: https://jobs.lever.co/quantco-/56ca02ab-f0a2-4209-8308-c70e4b6045c7
+- **Work Model & Location**: Hybrid in Berlin (or other European offices like Munich, Cologne, Karlsruhe, London, Zurich).
+- **The Role (Job Description)**: Work in an agile, cross-functional team on innovative greenfield projects to build intuitive user interfaces for AI-based systems. You will own applications end-to-end, from ideation and prototyping to production, and continuously refine features based on user feedback and data to deliver measurable impact. You will tackle unique challenges in human-computer interaction in close collaboration with deep learning engineers, AI scientists, and other software teams.
+- **The Ideal Candidate**: 
+  - At least 3 years of experience as a front-end engineer building complex React applications that solve real user problems.
+  - Proficiency with TypeScript; Python knowledge is beneficial.
+  - Experience in designing and implementing backends for frontends.
+  - Ability to write clean, effective, and production-ready code.
+  - Self-direction and drive to create exceptional experiences without needing detailed specifications.
+  - Adaptability to evolving requirements and openness to rapid iteration.
+- **Application Strategy & Intel**: Apply directly via the Lever link. They offer a generous compensation package that includes a base salary, bonus, stock options, along with additional location-based benefits. No specific deadline mentioned.

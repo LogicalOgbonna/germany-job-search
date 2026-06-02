@@ -1,0 +1,15 @@
+- **Job Title**: Front-end Engineer
+- **Company Intelligence**: Ailoys GmbH is transforming the manufacturing landscape by integrating advanced technologies like IoT, sensor systems, AI and machine learning. Their mission is to empower manufacturing facilities with smarter processes, improved quality, and enhanced efficiency. They are a fast-growing, innovative team working on cutting-edge technologies in industrial AI, IoT, and manufacturing automation.
+- **Direct Application Link**: https://ailoys-1732528276.teamtailor.com/jobs/5439508-front-end-engineer
+- **Work Model & Location**: Berlin (Likely on-site or hybrid, based in Berlin).
+- **The Role (Job Description)**: Front-end development for their manufacturing and IoT solutions. Focus on optimizing UI performance and building modern UIs using component-based development, CSS-in-JS, Material-UI/Bootstrap. You will contribute to impactful projects with leading global manufacturing companies.
+- **The Ideal Candidate**: 
+  - A minimum of 2-3 years of relevant work experience is required.
+  - Strong knowledge of JavaScript/TypeScript.
+  - Experience with React, including state management.
+  - Knowledge of modern UI development approaches: component-based development, CSS-in-JS, Material-UI/Bootstrap.
+  - Experience in optimizing UI performance.
+  - Knowledge of Docker and basic container usage for development and deployment.
+  - Basic Linux skills.
+  - Nice to have: Experience in setting up CI/CD pipelines, experience with cloud platforms (AWS, GCP, Azure), familiarity with WebSocket and real-time application development, understanding of DevOps processes and experience with Kubernetes/AWS ECS.
+- **Application Strategy & Intel**: Apply via the Teamtailor link. The application requires a resume and a brief cover letter detailing your relevant experience, as well as your salary expectations. They usually respond within two weeks.

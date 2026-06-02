@@ -1,0 +1,7 @@
+- **Job Title**: Senior JavaScript Developer (f/m/x)
+- **Company Intelligence**: verkstedt is a distributed team of software developers specializing in digital healthcare and retail media. They build products and services in German healthcare. They value pragmatic solutions over dogma and focus on performance and scalability.
+- **Direct Application Link**: https://join.com/companies/verkstedt/15956547-senior-javascript-developer-f-m-x
+- **Work Model & Location**: Hybrid (Berlin, Germany) - minimal meetings.
+- **The Role (Job Description)**: Take the lead on JavaScript applications. Architect and implement robust frontend applications using React, TypeScript, and modern tooling. Build and maintain component libraries. Develop backend services using Node.js and TypeScript. Build and maintain CI/CD pipelines. Work on greenfield projects and evolve existing systems.
+- **The Ideal Candidate**: 4-5 years of hands-on JavaScript development experience. Strong experience with React, modern frontend architecture, and TypeScript (frontend and backend). Strong experience with Node.js. Familiarity with state management, web performance optimization, testing strategies (unit, integration, e2e), CI/CD, and containerization (Docker). Fluency in English; German is a bonus.
+- **Application Strategy & Intel**: Apply via Join.com. Highlight React, TypeScript, Node.js, and CI/CD experience. Emphasize your pragmatic approach and ability to communicate complex technical ideas. Mention your openness to using AI tools.

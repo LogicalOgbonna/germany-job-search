@@ -1,0 +1,5 @@
+I'm a frontend engineer with 8 years of experience building complex, real-time web applications with React and TypeScript. I'm currently at Genentech (Roche), where I've architected design systems, built real-time chat interfaces powered by RAG pipelines, and owned the migration of a clinical data platform from Vue.js to a React-based Chrome extension.
+
+What draws me to Deepslate is the opportunity to own the frontend ecosystem at an early-stage AI company building core voice infrastructure. I've worked extensively with real-time data streaming (SSE, EventSource API, WebSockets) and have experience building developer-facing dashboards, billing portals, and component libraries, which maps directly to this role. I also recently architected a full-stack AI platform (Next.js, NestJS, pgvector) from scratch as a monorepo serving multiple applications, so I'm comfortable building frontend infrastructure from the ground up and making foundational architecture decisions.
+
+I thrive in startup environments where I can shape the product, move fast, and take full ownership of what I build.

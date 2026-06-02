@@ -1,0 +1,24 @@
+# Elite Briefing: Frontend Developer at Refine Studio
+
+- **Job Title**: Frontend Developer
+- **Company Intelligence**: Refine Studio is a small German digital product studio focused on cloud-native applications and employee-experience products spanning recognition, incentives, e-learning, and gamification. Compared with the larger platform companies in this search, it is much smaller and more intimate, which usually means more flexibility, broader scope, and a more design-conscious environment. It appears best suited for someone who values autonomy, remote flexibility, and a startup-minded team more than brand-name signaling.
+- **Direct Application Link**: https://refinestudio.jobs.personio.com/job/1572417?language=en&apply
+- **Work Model & Location**: Remote within Germany, anchored in Saarbrücken, with offices in Saarbrücken and Mainz.
+- **The Role (Job Description)**:
+  - Build frontend products in a domain centered on employee experience and recognition.
+  - Work across modern frontend technologies, especially TypeScript, React, and Next.js.
+  - Contribute ideas beyond coding, including user experience and adjacent backend concerns.
+  - Operate with high autonomy in a small team where everyone is expected to push objectives forward.
+  - Help shape digital products in a studio-style environment with a strong emphasis on collaboration and refinement.
+- **The Ideal Candidate**:
+  - Hands-on experience with modern frontend technologies.
+  - Strong interest in React, Next.js, and TypeScript.
+  - Curiosity about UX, design, and adjacent technical areas.
+  - Intrinsic motivation, self-direction, and comfort with autonomy.
+  - Fit with a small-team culture that values humor, openness, and personal growth.
+- **Application Strategy & Intel**:
+  - CV is required. No explicit deadline is listed.
+  - This is a good fit if you want a smaller team where your influence is likely to be visible quickly.
+  - Tailor toward React, Next.js, TypeScript, product ownership, and remote self-management.
+  - If you have worked in startup settings, built polished UX, or enjoy close-knit, design-aware teams, bring that to the front.
+  - The company highlights flexible workation policies, lightweight vacation planning, regular feedback, and learning support.

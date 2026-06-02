@@ -1,0 +1,18 @@
+- **Job Title**: Senior Node.js/React Full-Stack Entwickler (m/w/d)
+- **Company Intelligence**: devowl.io creates WordPress plugins (and soon SaaS products) focused on data protection and consent management (e.g., Real Cookie Banner). They are a small, remote-first team communicating at eye level with flexible working hours. Over 200,000 websites use their products.
+- **Direct Application Link**: https://devowl.io/de/job/senior-node-js-react-full-stack-entwickler/
+- **Work Model & Location**: 100% Remote within Germany. 36-40 hours per week.
+- **The Role (Job Description)**: 
+  - Technical support for new products (with ownership).
+  - Collaborative code reviews and automated test development.
+  - Idea development and implementation in a monorepo.
+  - Integration of third-party APIs and implementing REST APIs.
+  - UI/UX optimization and feature implementation.
+- **The Ideal Candidate**: 
+  - 3+ years practical experience in Node.js backends and/or React frontends with TypeScript.
+  - Experience with distributed systems (Redis, BullMQ, NATS) or strong interest in learning.
+  - Fluent in German and English (bilingual environment).
+  - Strong Git (Conventional Commits), VS Code Remote experience.
+  - Familiarity with LLM-based AI tools (Cursor, GPT Codex, Claude) is highly welcome.
+  - (Optional) NestJS or modern PHP/WordPress experience.
+- **Application Strategy & Intel**: No formal cover letter required; simply share why you are interested in data protection solutions, along with your CV and links to (hobby) projects. Entry date is listed as February 2026 or later. Perks include 30 days vacation, equipment of choice, company pension allowance, and flexible hours. Contact is Jan Karres (Founder and CEO).

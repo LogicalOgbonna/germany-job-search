@@ -1,0 +1,27 @@
+# Elite Briefing: Senior Software Engineer (Fullstack) - Metrify Smart Metering at Enpal
+
+- **Job Title**: Senior Software Engineer (Fullstack) - Metrify Smart Metering
+- **Company Intelligence**: This role sits inside Metrify Smart Metering, described as a strategic Enpal spin-off focused on Germany's smart-meter rollout. That makes it especially interesting because it combines Enpal's scale, mission, and capital base with a smaller-team, build-from-scratch operating mode. Enpal itself is a leading German climate-tech unicorn with substantial funding, nationwide operational scale, and a strong product-and-operations engineering culture. Metrify appears to offer more greenfield scope than a typical large-company role.
+- **Direct Application Link**: https://jobs.ashbyhq.com/enpal/01cf7b68-054a-4c4d-8961-df45e36cfafd
+- **Work Model & Location**: Berlin, Germany, hybrid/on-site according to public role summaries.
+- **The Role (Job Description)**:
+  - Help build and scale the core product systems behind smart metering operations in Germany.
+  - Work in a very small, high-ownership team described as a "1.5 pizza team" with direct exposure to leadership.
+  - Own systems end to end, including backend services, integrations, and frontend contributions.
+  - Integrate internal systems with external tools such as CRM, WFM, and Wilken-related platforms.
+  - Build automation logic and support product workflows around device- and data-driven operations.
+  - Participate in the full product lifecycle from early idea through deployment and iteration.
+- **The Ideal Candidate**:
+  - Strong fullstack or backend-heavy engineering experience with the ability to contribute across the stack.
+  - Proficiency in TypeScript/Node.js, or strong transferable experience in Python or C#.
+  - Experience with REST API design, service-oriented architecture, and SQL/NoSQL database work.
+  - Comfort with distributed systems, integrations, and high-availability backend design.
+  - Nice-to-have experience with Docker, cloud platforms, CI/CD pipelines, and event-driven architectures.
+  - Strong ownership mindset, mentoring ability, and comfort operating in ambiguity.
+- **Application Strategy & Intel**:
+  - Apply with CV. No explicit deadline surfaced.
+  - This is likely one of the highest-upside Enpal roles if you want startup-like ownership inside a larger climate-tech company.
+  - Tailor your application toward greenfield product building, integrations, automation, backend systems, and enough frontend fluency to support end-to-end product delivery.
+  - If you have worked in IoT, utilities, field operations, workflow systems, or data-heavy operational platforms, that is especially relevant here.
+  - Public secondary sources report compensation around the mid-€80k range for this role, but treat that as directional rather than authoritative.
+  - Because this team reportedly works closely with the CTO and is building from scratch, expect interviews to probe ownership, architecture judgment, and ability to make progress without heavy process scaffolding.

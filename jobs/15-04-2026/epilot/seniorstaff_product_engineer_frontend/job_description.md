@@ -1,0 +1,27 @@
+# Elite Briefing: Senior/Staff Product Engineer (Frontend) at epilot
+
+- **Job Title**: Senior/Staff Product Engineer (Frontend)
+- **Company Intelligence**: epilot is a Cologne-based B2B SaaS company building software for the energy transition, helping utilities and grid operators digitize sales, service, and operational workflows. The company positions itself around making complex products easy to sell online, starting with the energy market, and has raised fresh growth capital to accelerate product development and AI capabilities. This is the kind of company where the mission is commercially real, the market is messy, and product engineers can have visible impact quickly.
+- **Direct Application Link**: https://epilot.recruitee.com/o/senior-product-engineer-frontend
+- **Work Model & Location**: Remote, associated with Cologne, Germany. The company also supports hybrid or office-based collaboration.
+- **The Role (Job Description)**:
+  - Build and extend React applications that support epilot's SaaS platform.
+  - Implement UX designs and wireframes from designers into production-ready interfaces.
+  - Write unit and end-to-end tests for shipped features.
+  - Work inside a cross-functional team of frontend and backend engineers, designers, and product managers.
+  - Participate in feature conception, error analysis, and ongoing product optimization.
+  - Operate in an engineering culture centered on ownership, DevOps responsibility, API-first thinking, and frequent shipping.
+- **The Ideal Candidate**:
+  - 4-5+ years of JavaScript experience.
+  - Strong React experience, including hooks, routing, and state management.
+  - Fluency with TypeScript, ES6, Webpack, and ESLint.
+  - Comfort building responsive user interfaces with HTML and CSS.
+  - Nice-to-have experience with GraphQL, Node.js, AWS, and e-commerce environments.
+  - Product-minded engineering instincts rather than a pure ticket-execution mindset.
+- **Application Strategy & Intel**:
+  - CV is required. No formal deadline is listed.
+  - This company clearly wants product engineers, not just frontend implementers, so emphasize ownership, shipping, and business understanding.
+  - Strong talking points for an application: React platform work, API-heavy frontend integration, testing discipline, collaboration with product/design, and ability to move metrics.
+  - If you have examples of owning a domain, improving reliability or adoption, or working in ambiguous product environments, prioritize those.
+  - The company publishes explicit 30/90/180-day expectations, which is a good sign of role clarity and can help you prepare for interviews.
+  - Remote flexibility is strong, but the company still has a clear HQ presence and team-event culture in Cologne.

@@ -1,0 +1,23 @@
+# Elite Briefing: Senior Frontend Engineer at Langfuse
+
+- **Job Title**: Senior Frontend Engineer
+- **Company Intelligence**: Langfuse is building an open-source LLM engineering platform to help teams debug, analyze, and iterate on their AI applications. They are part of ClickHouse and are focused on creating developer tools for the rapidly growing AI ecosystem. The engineering culture is highly technical, focusing on performance, complex data visualization, and open-source collaboration.
+- **Direct Application Link**: https://jobs.ashbyhq.com/langfuse/70495b02-82dd-4495-9e60-c5537a9602c8
+- **Work Model & Location**: Berlin, Germany (Hybrid). Remote-first across Europe (Berlin, London, Munich, Paris, Zurich), but requires one mandatory week per month in the Berlin office (travel expenses covered).
+- **The Role (Job Description)**: 
+  - Build performant, data-intensive views for LLM traces, prompts, and experiments.
+  - Optimize rendering performance for large datasets (e.g., tens of thousands of tokens).
+  - Own the React setup, including component architecture and testing.
+  - Build complex interactive features such as agent graph visualizations, trace views, and inline comments.
+  - Collaborate closely on UI/UX and design systems.
+  - Ship features end-to-end, which includes extending tRPC APIs when necessary.
+- **The Ideal Candidate**: 
+  - Strong proficiency in React, TypeScript, and modern CSS.
+  - Deep understanding of performance profiling (React renders, layout thrashing, virtualization, memoization).
+  - Ability to self-manage projects, collaborate with designers, and engage directly with users.
+  - Preferred: CS/quantitative degree, experience with large data applications, or a background in data visualization/developer tools.
+  - Experience with their tech stack: TypeScript monorepo, Next.js, tRPC, PostgreSQL, ClickHouse, S3, and Redis.
+- **Application Strategy & Intel**: 
+  - Salary range: €90K – €160K + Equity.
+  - Application requires standard Resume/CV.
+  - Highlight any experience with data-heavy applications, rendering optimizations (virtualization), and developer tools (DevTools) since the core product is an LLM engineering platform.

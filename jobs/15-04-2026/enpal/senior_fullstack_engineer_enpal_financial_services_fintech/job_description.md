@@ -1,0 +1,27 @@
+# Elite Briefing: (Senior) Fullstack Engineer - Enpal Financial Services - FinTech at Enpal
+
+- **Job Title**: (Senior) Fullstack Engineer - Enpal Financial Services - FinTech
+- **Company Intelligence**: Enpal is one of Germany's best-known climate-tech companies and a green-tech unicorn focused on accelerating residential energy adoption through solar, battery storage, heat pumps, EV charging, and related financing products. The company operates at significant scale, has raised major late-stage funding including a large Series D, and has been valued in the multibillion-euro range. From an engineering perspective, Enpal emphasizes domain-based teams, end-to-end ownership, hybrid collaboration, and a "you build it, you run it, you own it" mentality. That makes this role attractive for engineers who want business-critical software scope rather than narrow feature work.
+- **Direct Application Link**: https://jobs.ashbyhq.com/enpal/4578ace9-69cc-4a8e-b23a-f5c051a29121
+- **Work Model & Location**: Berlin, Germany. Reported as on-site or hybrid depending on source, with Enpal generally operating a hybrid engineering model.
+- **The Role (Job Description)**:
+  - Build fullstack systems for Enpal Financial Services, directly supporting the fintech layer behind Enpal's energy products.
+  - Take end-to-end ownership of features, services, and systems across backend, frontend, and deployment workflows.
+  - Design and ship scalable backend services and user-facing frontend functionality.
+  - Work with internal and external integrations, APIs, CI/CD, deployments, and infrastructure.
+  - Collaborate inside cross-functional domain teams with product, design, QA, and engineering peers.
+  - At senior level, help set engineering standards, mentor others, and drive technical discussions.
+- **The Ideal Candidate**:
+  - Strong fullstack engineering background with TypeScript and Node.js.
+  - Frontend experience with React and ideally Next.js.
+  - Experience designing and consuming APIs and working with relational or NoSQL databases.
+  - Familiarity with Docker, AWS, and CI/CD pipelines such as GitHub Actions.
+  - Comfortable owning systems end to end, not just implementing tickets.
+  - Good fit for a fast-moving, product-oriented, domain-driven engineering culture.
+- **Application Strategy & Intel**:
+  - Apply with CV. No hard application deadline was surfaced.
+  - This is a strong role if you want real fullstack ownership in a company with large commercial traction and mission-driven positioning.
+  - Tailor your application around TypeScript, Node.js, React, domain ownership, integrations, deployment responsibility, and pragmatic product delivery.
+  - If you have experience in fintech, operational systems, internal tools, workflow-heavy SaaS, or customer-critical business platforms, surface that early.
+  - Compensation data from public salary aggregation sites suggests Enpal fullstack roles commonly sit in a competitive German mid-to-senior range, but exact package details were not transparently published on the posting.
+  - Be ready to discuss trade-offs across frontend, backend, and operations, because the role appears to reward broad technical range rather than specialization alone.

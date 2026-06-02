@@ -13,6 +13,28 @@ Your mission is to scour the web for the best job openings in {{location}}. Spec
 - **Frontend** (React, NextJS)
 - **Fullstack** (React, Node, NextJS, NestJS) 
 
+To find these roles, you MUST use the following targeted search queries (replace "frontend" with "fullstack" as needed):
+- `site:jobs.ashbyhq.com "frontend" "{{location}}"`
+- `site:lever.co "frontend" "{{location}}"`
+- `site:greenhouse.io "frontend" "{{location}}"`
+- `site:workable.com "frontend" "{{location}}"`
+- `site:bamboohr.com "frontend" "{{location}}"`
+- `site:smartrecruiters.com "frontend" "{{location}}"`
+- `site:teamtailor.com "frontend" "{{location}}"`
+- `site:jobvite.com "frontend" "{{location}}"`
+- `site:recruitee.com "frontend" "{{location}}"`
+- `site:join.com "frontend" "{{location}}"`
+- `site:talent.com "frontend" "{{location}}"`
+- `site:jobs.personio.de "frontend" "{{location}}"`
+- `site:career.talentlyft.com "frontend" "{{location}}"`
+- `site:careers.homerun.co "frontend" "{{location}}"`
+- `site:polymer.co "frontend" "{{location}}"`
+- `site:comeet.com "frontend" "{{location}}"`
+- `site:jobsoid.com "frontend" "{{location}}"`
+- `site:applicantstack.com "frontend" "{{location}}"`
+- `site:icims.com "frontend" "{{location}}"`
+- `site:myworkdayjobs.com "frontend" "{{location}}"`
+
 For every compelling opportunity you uncover, execute the following precise workflow:
 
 1. **Identify and Normalize**: Determine the exact company name and official job title.

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ogbonna Arinze - Frontend Developer CV</title>
+<style>
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 10pt;
+    line-height: 1.3;
+    color: #000;
+    padding: 36px 46px;
+    max-width: 850px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 22pt;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2px;
+  }
+  .contact {
+    text-align: center;
+    font-size: 10pt;
+    margin-bottom: 10px;
+  }
+  .contact a {
+    color: #0563C1;
+    text-decoration: underline;
+  }
+  h2 {
+    font-size: 10.5pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-bottom: 1px solid #000;
+    padding-bottom: 2px;
+    margin-top: 12px;
+    margin-bottom: 5px;
+  }
+  .summary {
+    margin-bottom: 3px;
+    text-align: justify;
+  }
+  .competencies {
+    margin-bottom: 3px;
+  }
+  .competency-item {
+    margin-bottom: 2px;
+    padding-left: 16px;
+    position: relative;
+  }
+  .competency-item::before {
+    content: "\2022";
+    position: absolute;
+    left: 4px;
+    top: 0;
+  }
+  .competency-item strong {
+    font-weight: bold;
+  }
+  .job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+  .company {
+    font-weight: bold;
+    font-size: 10.5pt;
+  }
+  .location {
+    font-size: 10pt;
+    text-align: right;
+  }
+  .title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 3px;
+  }
+  .job-title {
+    font-style: italic;
+    font-weight: bold;
+    font-size: 10pt;
+  }
+  .dates {
+    font-style: italic;
+    font-size: 10pt;
+    text-align: right;
+  }
+  ul {
+    margin-left: 16px;
+    margin-bottom: 4px;
+  }
+  li {
+    margin-bottom: 3px;
+    text-align: justify;
+  }
+  li strong {
+    font-weight: bold;
+  }
+  .education-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 4px;
+  }
+  .edu-school {
+    font-weight: bold;
+    font-size: 10.5pt;
+  }
+  .edu-location {
+    font-size: 10pt;
+  }
+  .edu-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .edu-degree {
+    font-style: italic;
+    font-size: 10pt;
+  }
+  .edu-date {
+    font-style: italic;
+    font-size: 10pt;
+  }
+  .project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+  .project-name {
+    font-weight: bold;
+    font-size: 10.5pt;
+  }
+  .project-link {
+    font-size: 10pt;
+    text-align: right;
+  }
+  .project-link a {
+    color: #0563C1;
+    text-decoration: underline;
+  }
+  .project-desc {
+    font-style: italic;
+    font-size: 10pt;
+    margin-bottom: 3px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Ogbonna Arinze</h1>
+<div class="contact">
+  <a href="mailto:arinzeogbo@gmail.com">arinzeogbo@gmail.com</a> | <a href="https://www.linkedin.com/in/arinzeogbonna">LinkedIn</a>
+</div>
+
+<h2>Summary</h2>
+<p class="summary">
+Frontend Developer with 8 years of professional experience working with HTML, CSS, and structured data formats across healthcare, fintech, and enterprise environments. Skilled in managing and processing content using HTML, JSON, and CSV-based workflows, with a meticulous, detail-oriented approach to data accuracy and consistency. Proven ability to collaborate effectively within cross-functional teams, maintain high-quality standards across content systems, and quickly adapt to new tools and processes.
+</p>
+
+<h2>Core Competencies</h2>
+<div class="competencies">
+  <div class="competency-item"><strong>Web Technologies:</strong> HTML, CSS, JavaScript (ESNext), TypeScript, responsive layouts, and cross-browser compatibility.</div>
+  <div class="competency-item"><strong>Structured Data:</strong> JSON, CSV, REST APIs, data validation, and content processing workflows.</div>
+  <div class="competency-item"><strong>Content Management:</strong> Component documentation (Storybook), content accuracy auditing, and systematic data handling across multiple systems.</div>
+  <div class="competency-item"><strong>Quality & Accuracy:</strong> Detail-oriented development, automated testing (Jest, Playwright), code review, and data consistency verification.</div>
+  <div class="competency-item"><strong>Collaboration & Communication:</strong> Agile/Scrum workflows, cross-functional team collaboration, mentorship, and comprehensive documentation.</div>
+  <div class="competency-item"><strong>Tools & Infrastructure:</strong> Git, GitHub Actions, CI/CD pipelines, Docker, VS Code, and Chrome DevTools.</div>
+</div>
+
+<h2>Work Experience</h2>
+
+<div class="job-header">
+  <span class="company">Genentech (Roche)</span>
+  <span class="location">San Francisco, CA (Remote)</span>
+</div>
+<div class="title-row">
+  <span class="job-title">Frontend Engineer</span>
+  <span class="dates">May 2023 - Present</span>
+</div>
+<ul>
+  <li>Spearheaded the redesign of the main clinical trial data product, migrating from a <strong>Vue.js</strong> web application to a <strong>React</strong> Chrome extension, managing structured content configurations across clinical site integrations.</li>
+  <li>Maintained and extended the existing <strong>Vue.js</strong> codebase during the migration period, ensuring <strong>data accuracy</strong> and consistency across both platforms while fixing bugs and shipping features in parallel.</li>
+  <li>Architected a reusable design system in <strong>React</strong> with <strong>HTML/CSS</strong> (Tailwind CSS), improving UI consistency and accessibility (<strong>WCAG</strong>) across multiple product teams.</li>
+  <li>Co-developed a full-stack <strong>Next.js</strong> chat widget processing <strong>JSON</strong>-structured API responses from an OpenAI-powered RAG system, enabling users to query data in real time via a conversational interface.</li>
+  <li>Optimized application performance by implementing lazy loading, code splitting, and CDN asset delivery, measuring improvements via <strong>Lighthouse</strong> and <strong>Chrome DevTools</strong>.</li>
+  <li>Increased release reliability by integrating <strong>Playwright</strong> end-to-end tests into the CI/CD pipeline, automating test reporting with Allure Reports and configuring Slack notifications for build quality visibility.</li>
+  <li>Authored comprehensive technical documentation for component APIs and configuration workflows, ensuring clear communication of development processes across teams.</li>
+  <li>Mentored a team of two junior developers (interns), fostering a culture of technical excellence and attention to detail.</li>
+</ul>
+
+<div class="job-header">
+  <span class="company">Descasio</span>
+  <span class="location">Lagos, Nigeria (Hybrid)</span>
+</div>
+<div class="title-row">
+  <span class="job-title">Senior Frontend Developer</span>
+  <span class="dates">May 2021 - Mar 2023</span>
+</div>
+<ul>
+  <li>Led the design and implementation of an intuitive <strong>React</strong> user interface using <strong>HTML/CSS</strong> and TypeScript, achieving a <strong>25% boost in user engagement</strong> and collaborating with architects to create a scalable frontend architecture that accelerated development by <strong>30%</strong>.</li>
+  <li>Utilized <strong>Storybook</strong> for documenting React components with structured <strong>HTML/CSS</strong> examples, streamlining change management and ensuring clear communication of development processes across the team.</li>
+  <li>Optimized frontend performance by profiling render bottlenecks with React Profiler and <strong>Lighthouse</strong>, reducing bundle size by <strong>30-40%</strong> through systematic analysis with rollup-plugin-visualizer and webpack-bundle-analyzer.</li>
+  <li>Enhanced development workflow by introducing <strong>Jest</strong> and Enzyme testing frameworks, leading to a <strong>20% decrease</strong> in bug reports through rigorous quality assurance.</li>
+  <li>Established engineering standards for code quality using ESLint, Prettier, Husky, Lint-staged, and <strong>GitHub Actions</strong>, reducing errors and accelerating CI/CD processes.</li>
+  <li>Supported agile project management practices, aiding in the precise gathering of user requirements and effectively planning user stories, estimates, and work plans.</li>
+  <li>Mentored junior engineers on frontend best practices, fostering high-quality, maintainable code across projects.</li>
+</ul>
+
+<div class="job-header">
+  <span class="company">ActivEdge Technologies</span>
+  <span class="location">Lagos, Nigeria</span>
+</div>
+<div class="title-row">
+  <span class="job-title">Senior React Developer</span>
+  <span class="dates">Oct 2019 - Sep 2021</span>
+</div>
+<ul>
+  <li>Built a high-volume bank <strong>Settlement Solution</strong> in a team of 3, processing structured transaction data (including <strong>CSV</strong> and <strong>JSON</strong> formats) for thousands to millions of daily transactions, boosting settlement rates by <strong>80%</strong>.</li>
+  <li>Developed critical payment modules (MasterCard, VISA, Express-cash, E-commerce) using <strong>React</strong>, Redux, RxJS, and Axios, handling complex <strong>JSON</strong> API request/response structures.</li>
+  <li>Built a real-time account reconciliation solution, processing structured financial data and boosting daily reconciliation accuracy by <strong>60%</strong> through innovative data management strategies.</li>
+  <li>Built dynamic data visualization dashboards using <strong>React</strong> and react-chartjs, transforming <strong>JSON</strong> data feeds into actionable visual reports with Redux Toolkit and Ant Design.</li>
+</ul>
+
+<div class="job-header">
+  <span class="company">Founders Lair</span>
+  <span class="location">Beijing, China (Remote)</span>
+</div>
+<div class="title-row">
+  <span class="job-title">Full Stack Engineer (Contract)</span>
+  <span class="dates">Oct 2020 - Feb 2021</span>
+</div>
+<ul>
+  <li>Developed <strong>NodeJS RESTful APIs</strong> handling <strong>JSON</strong> request/response payloads, translating business requirements into efficient <strong>MongoDB</strong> database models and schemas.</li>
+  <li>Transformed Figma designs into reusable <strong>React</strong> components with semantic <strong>HTML</strong> and <strong>CSS</strong>, and engineered a CI/CD pipeline for automated deployment to Heroku and AWS.</li>
+  <li>Mentored two interns through frontend and backend projects, providing technical guidance, task management, and documentation practices.</li>
+</ul>
+
+<div class="job-header">
+  <span class="company">SureTrade Business Solutions</span>
+  <span class="location">Nigeria</span>
+</div>
+<div class="title-row">
+  <span class="job-title">Frontend Developer</span>
+  <span class="dates">Mar 2018 - Oct 2019</span>
+</div>
+<ul>
+  <li>Designed <strong>MongoDB</strong> database schemas and implemented server-side logic in <strong>NodeJS</strong>, building and testing <strong>REST API</strong> endpoints that processed <strong>JSON</strong> data for multiple client-facing applications.</li>
+  <li>Developed <strong>SureEdu</strong>, a school management portal in a team of 5 using <strong>HTML</strong>, <strong>CSS</strong>, and <strong>JavaScript</strong>, handling staff payroll and attendance tracking, student records (exams, reports, attendance), and guardian communications.</li>
+  <li>Responsible for full-stack integration, connecting the <strong>HTML/JavaScript</strong> frontend to NodeJS backend services, developing user use cases, and converting business requirements into database schemas.</li>
+  <li>Devised comprehensive documentation for each application, detailing all functions, capabilities, and features. Tested user-defined functions, triggers, and API endpoints to ensure data reliability and accuracy.</li>
+</ul>
+
+<h2>Education</h2>
+<div class="education-header">
+  <span class="edu-school">University of Nigeria</span>
+  <span class="edu-location">Nsukka, Enugu</span>
+</div>
+<div class="edu-detail">
+  <span class="edu-degree">BSc Computer Science - 4.1 CGPA</span>
+  <span class="edu-date">Graduation Date: Sep 2019</span>
+</div>
+
+</body>
+</html>

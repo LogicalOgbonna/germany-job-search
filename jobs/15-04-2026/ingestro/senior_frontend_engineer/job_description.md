@@ -1,0 +1,27 @@
+# Elite Briefing: Senior Frontend Engineer at Ingestro
+
+- **Job Title**: Senior Frontend Engineer
+- **Company Intelligence**: Ingestro is a German startup focused on AI-assisted data onboarding and import infrastructure for SaaS products. Formerly known as nuvo, the company builds tooling that helps software teams automate customer data imports, mapping, cleaning, and validation, which makes it a compelling pick if you enjoy developer tooling, workflow products, and data-heavy interfaces. It is earlier stage than the larger companies in this search, but that also means more product-shaping upside and broader ownership.
+- **Direct Application Link**: https://ingestro.recruitee.com/o/senior-frontend-engineer-gn-1
+- **Work Model & Location**: Berlin, Germany, with flexible home-office and workation policies.
+- **The Role (Job Description)**:
+  - Take a leading role in building the frontend of a new data platform from scratch.
+  - Own frontend architecture and user experience for complex data onboarding and workflow configuration.
+  - Build production-grade features in React and TypeScript.
+  - Prototype and iterate quickly on product flows for non-technical users interacting with complex data systems.
+  - Define frontend patterns, component architecture, and state management.
+  - Work closely with product, design, and backend to turn ambiguous problems into usable software.
+- **The Ideal Candidate**:
+  - 6+ years of experience with React and TypeScript.
+  - Strong background in complex, interactive UIs and frontend architecture.
+  - Experience building products from scratch in ambiguous environments.
+  - Strong product mindset and comfort challenging design and product assumptions.
+  - Excellent English communication and the ability to collaborate across distributed teams.
+  - Bonus points for data-heavy products, SDK or API-driven products, performance work, and cloud-native awareness.
+- **Application Strategy & Intel**:
+  - CV is required. No explicit application deadline is listed.
+  - This role is strongest for candidates who want genuine 0-to-1 ownership rather than maintenance work.
+  - Tailor toward React architecture, workflow-heavy UIs, product thinking, ambiguous problem-solving, and building for non-technical end users.
+  - If you have ever owned a new product surface, created internal frontend standards, or shipped data-intensive UX, lead with that.
+  - Compensation includes VSOP, plus growth budget, pension support, Urban Sports Club or JobTicket, and flexible home-office policies.
+  - Because the company is still relatively small, expect interviews to weigh clarity of thinking and hands-on ownership heavily.

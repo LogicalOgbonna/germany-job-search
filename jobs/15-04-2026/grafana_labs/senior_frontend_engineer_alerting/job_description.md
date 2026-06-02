@@ -1,0 +1,26 @@
+# Elite Briefing: Senior Frontend Engineer, Alerting at Grafana Labs
+
+- **Job Title**: Senior Frontend Engineer, Alerting
+- **Company Intelligence**: Grafana Labs is one of the defining companies in modern observability, built around the hugely popular open-source Grafana ecosystem and a commercial cloud platform used by thousands of enterprises. It is remote-first, globally distributed, and known for strong engineering autonomy, open-source contribution, and product depth around metrics, logs, traces, and infrastructure monitoring. The company has raised substantial venture funding, reportedly reached multibillion-dollar valuation territory, and remains a serious category leader in observability tooling.
+- **Direct Application Link**: https://job-boards.greenhouse.io/grafanalabs/jobs/5856676004
+- **Work Model & Location**: Germany, fully remote.
+- **The Role (Job Description)**:
+  - Join the Grafana Alerting squad, one of the core teams inside the Grafana open-source project.
+  - Build frontend capabilities for alert management used in both open-source Grafana and Grafana Cloud.
+  - Help deliver features for a domain that spans alert ingestion, evaluation, delivery, and operations at significant scale.
+  - Influence roadmap, ship features, iterate based on usage, and own services in production.
+  - Participate in design discussions, mentoring, and on-call rotations as part of full product ownership.
+  - Work in a large distributed-systems context while maintaining a strong frontend focus.
+- **The Ideal Candidate**:
+  - Strong hands-on experience with React and TypeScript.
+  - Practical experience with Redux Toolkit and RTK Query.
+  - Comfort working with design systems and reusable UI libraries.
+  - Testing fluency with Jest, React Testing Library, and MSW.
+  - Familiarity with Webpack, ESLint, Prettier, NX, and yarn monorepo workflows.
+  - Strong written communication and the ability to thrive in a remote-first engineering environment.
+- **Application Strategy & Intel**:
+  - Resume/CV is required. No hard deadline is shown.
+  - Compensation is unusually transparent: EUR 97,034 to EUR 116,441 in Germany, plus RSUs.
+  - A strong application should highlight frontend ownership in complex product environments, observability-adjacent UI work if available, and experience balancing product delivery with reliability.
+  - If you have experience with design systems, testing rigor, platform work, or monorepos, bring that forward prominently.
+  - The team appears to value engineers who can do more than build screens, they want product-minded engineers who can operate production systems and contribute to a broader engineering culture.

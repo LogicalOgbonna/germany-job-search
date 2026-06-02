@@ -1,0 +1,7 @@
+- **Job Title**: Senior Frontend Engineer (m/f/d)
+- **Company Intelligence**: Pitch is a new company from the makers of Wunderlist. They are building a cross-platform presentation tool, backend services, and an open platform. They value diversity and build inclusive workplaces.
+- **Direct Application Link**: https://pitch.jobs.personio.com/job/161020
+- **Work Model & Location**: Berlin / Remote
+- **The Role (Job Description)**: Join a growing team of experienced developers building a cross-platform application. Collaborate to define architecture, quality standards, and best practices. Work closely with designers in small cross-functional teams to bring features from idea to prototype to final implementation. Work on frontend and possibly backend projects to build simple, high-quality, maintainable, and well-tested solutions.
+- **The Ideal Candidate**: Extensive experience shipping Single Page Applications. Enthusiastic about learning and working with ClojureScript (prior experience is a plus, not required). Working knowledge of state management libraries (Redux or Re-frame). Comfortable debugging problems anywhere in the stack. Product-oriented, combining thoughtfulness with pragmatism. Calm and focused under pressure.
+- **Application Strategy & Intel**: Apply directly via the Personio link. Emphasize experience with SPAs, state management, and a strong willingness to learn and work with ClojureScript. No specific deadline mentioned.

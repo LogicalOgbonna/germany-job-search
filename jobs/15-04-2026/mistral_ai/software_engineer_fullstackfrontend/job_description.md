@@ -1,0 +1,27 @@
+# Elite Briefing: Software Engineer, Fullstack/Frontend at Mistral AI
+
+- **Job Title**: Software Engineer, Fullstack/Frontend
+- **Company Intelligence**: Mistral AI is one of the highest-profile AI companies in Europe, founded in 2023 in Paris and focused on frontier models, open-weight AI, enterprise deployments, and sovereign AI infrastructure. The company has scaled aggressively, raised billions in funding, and is positioning itself as a serious European counterweight to OpenAI and Anthropic. Its product portfolio spans enterprise APIs, model customization, chat products, and cloud infrastructure, so the engineering bar is high and the environment is fast-moving, product-heavy, and deeply AI-native.
+- **Direct Application Link**: https://jobs.lever.co/mistral/2d0ff193-e96e-43b0-b4e5-2121142965b3/apply
+- **Work Model & Location**: Remote in Germany is possible, but this role is primarily centered around Mistral's European offices. The company explicitly prioritizes candidates in Paris or those open to relocation, and remote hires must travel to Paris for onboarding and at least 3 days per month afterward.
+- **The Role (Job Description)**:
+  - Build and evolve the Mistral Cloud Control Panel across the broader product suite.
+  - Ship fullstack product features with strong frontend ownership, improving usability and workflow efficiency for enterprise users.
+  - Work across TypeScript, Node.js, and frontend frameworks such as React, Next.js, Remix, or Vue.
+  - Collaborate closely with engineers, product managers, and designers to deliver polished user experiences.
+  - Solve complex product and infrastructure-adjacent problems with an emphasis on performance, reliability, and maintainable architecture.
+  - Contribute to a culture that values end-to-end ownership, code quality, and fast iteration.
+- **The Ideal Candidate**:
+  - 5+ years in high-standard UX/UI-heavy product environments.
+  - Strong TypeScript and Node.js foundations.
+  - Strong experience with a modern frontend framework, especially React or Next.js.
+  - Familiarity with modern web tooling and libraries such as TanStack React Query, tRPC, and Framer Motion.
+  - Comfortable owning end-to-end feature delivery with limited oversight.
+  - Strong communication, humility, and appetite for a high-talent, low-ego engineering culture.
+- **Application Strategy & Intel**:
+  - Resume/CV is required. No explicit deadline is listed.
+  - This is a strong match if you want AI-adjacent product work without being purely model-infra focused.
+  - Tailor the application around React, TypeScript, Next.js, product UX ownership, and shipping user-facing features in complex environments.
+  - Emphasize fullstack fluency carefully, especially Node.js APIs, UI architecture, and collaboration with design/product.
+  - If you apply, be ready to explain your strongest examples of turning complex technical systems into clear, usable interfaces.
+  - Hiring process includes intro, live coding, system design, optional project deep dive, culture discussion, and references.

@@ -1,0 +1,23 @@
+# Elite Briefing: Senior Software Engineer, Frontend at Cresta
+
+- **Job Title**: Senior Software Engineer, Frontend
+- **Company Intelligence**: Cresta is an AI-driven company aiming to turn customer conversations into competitive advantages for contact centers. Born from the Stanford AI lab, its leadership includes Sebastian Thrun (Google X, Waymo) and Ping Wu (Google Contact Center AI). They have raised significant funding from top-tier investors like Andreessen Horowitz, Greylock, and Sequoia, and serve clients like Intuit and Hilton. They are recognized as a top private AI company.
+- **Direct Application Link**: https://job-boards.greenhouse.io/cresta/jobs/4668095008
+- **Work Model & Location**: Berlin, Germany (Hybrid).
+- **The Role (Job Description)**: 
+  - Build a state-of-the-art Customer Data Platform to visualize insights and guide customer engagement.
+  - Work with PMs and UX designers to define product requirements and software architecture.
+  - Write high-quality code efficiently for the frontend (and backend).
+  - Apply synchronous and asynchronous design patterns and scale distributed applications.
+  - Identify opportunities to improve general engineering productivity.
+  - Integrate with CI/CD tools, test automation, monitoring, logging, and documentation.
+  - Develop multi-tier scalable, high-volume performing, and reliable user-centric applications.
+- **The Ideal Candidate**: 
+  - Deep understanding of the modern front-end ecosystem, specifically React, Vite, and Node.js.
+  - Comfortable defining and building robust APIs with a strong understanding of Websockets, REST, and RPC frameworks.
+  - Experience with database schema design and query performance for scalable, reactive products.
+  - Deep appreciation for observability as a first-class principle and familiarity with application performance monitoring.
+- **Application Strategy & Intel**: 
+  - Application requires Resume/CV.
+  - Be cautious of recruiting impersonations; all official communications will come from the `@cresta.ai` domain.
+  - Highlight experience with real-time data (Websockets), AI-driven interfaces, and full-stack capabilities (Node.js) to align with their Customer Data Platform focus.

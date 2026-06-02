@@ -1,0 +1,21 @@
+Motivation: Why are you interested in joining Cosuno?
+
+Cosuno sits at an intersection I find genuinely exciting: applying AI to a traditional industry where the impact is tangible and immediate. I have been building AI-powered features in production for the past few years, from RAG-based chat systems at Genentech to a multi-agent pipeline on my own platform (OurNigeria) that uses specialized agents for domain-specific analysis. When I saw that Cosuno is building BoQ editing agents and bidder recommendation systems, it clicked immediately, because that is the exact kind of agentic, user-facing AI work I enjoy most: taking a complex domain problem, breaking it into intelligent workflows, and shipping it as a product people actually use every day. Beyond the AI angle, the engineering culture resonates with me. I have spent years working in monorepo architectures with strict typing and comprehensive E2E testing, and I care deeply about code quality as a long-term investment, not just a checkbox. The combination of a pragmatic, ownership-oriented team, a real product solving real problems in construction procurement, and the autonomy to own features end-to-end is exactly the environment where I do my best work.
+
+
+Best practices: Name three software development best practices that are important to you personally
+
+1. Strict typing everywhere. I write TypeScript with strict mode enabled across every project I touch. Catching bugs at compile time instead of runtime saves hours of debugging and makes large codebases navigable. At Genentech, enforcing strict typing across a React migration and a Next.js RAG system gave the team confidence to refactor aggressively without breaking things. Types are documentation that never goes stale.
+
+2. End-to-end testing in CI, not as an afterthought. I have seen too many teams treat E2E tests as optional. At Genentech, I integrated Playwright tests into the CI/CD pipeline with automated Allure reports and Slack notifications on every push. On OurNigeria, I run Playwright across 4 test projects (desktop, mobile, authenticated flows) before every deploy. When E2E tests run on every commit, you catch integration issues before your users do.
+
+3. Own the full lifecycle. I believe in end-to-end feature ownership, from understanding the user problem through architecture, implementation, testing, deployment, and monitoring. When one person carries context across the entire lifecycle, the result is more coherent and ships faster. This is how I have worked on every major feature I have built, and it is the approach I look for in a team.
+
+
+AI in software development: What do you believe is the role of AI in software development today and how are you personally using it?
+
+AI is the most significant productivity multiplier in software development right now, but its value depends entirely on how deliberately you use it. I see it serving two distinct roles: as a development accelerator and as a product capability.
+
+As a development tool, I use AI daily for rapid prototyping, code generation, debugging, and exploring unfamiliar APIs. It compresses the time between idea and working code significantly. But I treat AI output the same way I treat a junior developer's pull request: I review everything, verify edge cases, and never merge without understanding what the code does. The developers who blindly accept AI output are accumulating technical debt faster than they are shipping.
+
+As a product capability, I have shipped AI features in production at two companies. At Genentech, I co-built a RAG-powered chat widget using OpenAI, LangChain, and Chroma that lets users query their own data through a conversational interface. On OurNigeria, I architected a multi-agent system with 5 specialized AI agents, a hybrid RAG pipeline (pgvector + BM25 + reranking), and real-time streaming, processing 700+ government documents so citizens can interrogate public spending in plain language. This hands-on experience building agentic AI systems is directly relevant to the kind of AI-powered features Cosuno is building, like BoQ editing agents and bidder recommendations. I understand the full stack of making AI useful in production: retrieval quality, prompt engineering, streaming UX, observability, and the pragmatic tradeoffs you make to ship something that works reliably at scale.

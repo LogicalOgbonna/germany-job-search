@@ -1,0 +1,13 @@
+- **Job Title**: Full-Stack Software Engineer - Expenses
+- **Company Intelligence**: Shine exists to help freelancers and small business owners reclaim the joy of working for themselves by bringing banking, invoicing, accounting, and admin together in one place. They are a multicultural team of over 400 people across France, Germany, Denmark, and the Netherlands, bringing together leading European fintechs like Shine, Kontist, and Tellow. The company is profitable and experiencing rapid growth.
+- **Direct Application Link**: https://careers.shine.co/jobs/7226441-fullstack-software-engineer-banking-experience
+- **Work Model & Location**: Job located in Berlin (or Paris/Copenhagen), with the possibility of two remote working days per week (Hybrid).
+- **The Role (Job Description)**: As a software engineer on the Expenses team (part of the Accounting domain), you will contribute to a variety of projects, from product discovery to front-end, back-end, and infrastructure. You will work primarily in Accounting to ensure entrepreneurs have an easy time booking expenses, and collaborate with Invoicing and Banking domains for cross-product compatibility. You will work with Node.js, TypeScript, React, Terraform, and Docker.
+- **The Ideal Candidate**: 
+  - 4+ years of professional experience in software development.
+  - Strong proficiency in TypeScript, with experience on the backend (NestJS is a plus) and frontend (ReactJS).
+  - Ability to work across multiple codebases, seamlessly switching between front-end and back-end tasks.
+  - Curiosity and eagerness to understand the business, product, and technologies.
+  - Open-mindedness and a collaborative attitude.
+  - Fluent in English (written and spoken).
+- **Application Strategy & Intel**: Apply via Talent.com. The recruitment process includes: 1) A 30-minute screening call with Talent Acquisition, 2) A 90-minute call with the Manager exploring technical experience and system design, 3) A 75-minute Technical Interview (coding session), and 4) An 85-minute soft skills interview based on a personality assessment and a team meeting.
