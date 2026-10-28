@@ -385,7 +385,10 @@ function ContactCard({
   remove: () => Promise<void>;
 }) {
   const [drafts, setDrafts] = useState(c.drafts),
-    [kind, setKind] = useState<keyof Drafts>("referral"),
+    // An existing connection is messaged on LinkedIn, so that draft opens first.
+    [kind, setKind] = useState<keyof Drafts>(
+      c.sourceKind === "LinkedIn connection" ? "connection" : "referral",
+    ),
     [name, setName] = useState(c.name),
     [title, setTitle] = useState(c.title),
     [reviewed, setReviewed] = useState(c.employmentReviewed),
