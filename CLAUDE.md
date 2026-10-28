@@ -62,6 +62,8 @@ HTML → PDF conversion uses Puppeteer with A4 format, zero margins (CSS handles
 
 ## Critical Rules
 
+- Database safety: never run `prisma migrate reset`, `prisma migrate dev`, `prisma db push`, or `prisma migrate diff --shadow-database-url` against `DATABASE_URL`, and never point any shadow/scratch database setting at it. Prisma wipes a shadow database. Use only `npm run db:migrate` (backs up first, then `prisma migrate deploy`). Take `npm run db:backup` before any schema or bulk data change. On 28 October 2026 a shadow-database drift check against `DATABASE_URL` erased the whole database.
+
 - Career start: Mar 2018. Current valid claim: 8 years of experience.
 - Genentech title is "Frontend Engineer" (not "Frontend Software Engineer").
 - Descasio title is "Senior Frontend Developer" (not "Staff Frontend Engineer").

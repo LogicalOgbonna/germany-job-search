@@ -1,4 +1,6 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
+// A backup on every start; a failed backup does not stop Jobdesk from starting.
+spawnSync("node", ["scripts/db-backup.mjs"], { stdio: "inherit" });
 // Portless assigns PORT; Conductor's allocation remains the direct-run fallback.
 const port = process.env.PORT ?? process.env.CONDUCTOR_PORT ?? "55010";
 const children = [
