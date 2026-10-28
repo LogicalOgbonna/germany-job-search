@@ -2878,6 +2878,20 @@ kbd {
 .referral-box .field {
   margin-bottom: 0;
 }
+.referral-connections ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.referral-connections li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
 .referral-actions {
   display: flex;
   gap: 12px;

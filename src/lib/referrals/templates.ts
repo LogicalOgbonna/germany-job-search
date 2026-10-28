@@ -9,6 +9,7 @@ export function makeDrafts(
   },
   contact: { name: string; email: string },
   profile: CandidateProfile,
+  options: { connected?: boolean } = {},
 ): Drafts {
   const person =
     contact.name && !/unconfirmed|profile|inbox/i.test(contact.name)
@@ -33,9 +34,19 @@ export function makeDrafts(
   const intro = `${greeting}\n\nI'm ${profile.contact.name}, a software engineer based in Berlin. I'm interested in the ${job.title} role at ${job.company}.`;
   const body = `${intro}\n\n${proof}\n\n${ask}\n\nRole: ${job.applyUrl}\n\nThanks,\n${profile.contact.name}`;
   const note = `${greeting} I'm ${profile.contact.name}. I'm exploring ${job.title} at ${job.company} and would like to learn more about the team. Open to connecting?`;
+  // An existing connection gets a direct message, not a request to connect. LinkedIn
+  // messages allow far more than a connection note, but the evidence line is clipped so a
+  // long verified bullet can never push the message past the limit.
+  const direct = (evidenceLine: string) =>
+    `${greeting}\n\nHope you're well. I'm applying for the ${job.title} role at ${job.company} and would value your view of the team and how engineering works there.\n\n${evidenceLine}\n\nIf you think I'd be a good fit, would you be open to referring me or pointing me to the hiring manager? Happy to send my CV.\n\nRole: ${job.applyUrl}\n\nThanks,\n${profile.contact.name}`;
+  const overflow = direct(proof).length - 1900;
+  const connected = direct(
+    overflow > 0 ? `${proof.slice(0, proof.length - overflow - 1)}…` : proof,
+  );
   return {
-    connection:
-      note.length <= 200
+    connection: options.connected
+      ? connected
+      : note.length <= 200
         ? note
         : `Hi ${person.slice(0, 24)}, I'm ${profile.contact.name.slice(0, 50)}, a Berlin-based software engineer exploring a role on your team. Open to connecting?`,
     referral: body,

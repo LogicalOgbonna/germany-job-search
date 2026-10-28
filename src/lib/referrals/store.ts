@@ -4,7 +4,11 @@ import { readProfile } from "../profile";
 import { hash } from "../domain";
 import { contactPriority, linkedinUrl, type FoundContact } from "./domain";
 import { discoverPublic } from "./discovery";
-export async function saveContact(jobId: string, contact: FoundContact) {
+export async function saveContact(
+  jobId: string,
+  contact: FoundContact,
+  options: { connected?: boolean } = {},
+) {
   const job = await db.job.findUniqueOrThrow({ where: { id: jobId } });
   const email = contact.email.toLowerCase();
   const linkedin = linkedinUrl(contact.linkedin);
@@ -20,7 +24,7 @@ export async function saveContact(jobId: string, contact: FoundContact) {
       jobId,
       identity,
       priority: contactPriority(contact.title || contact.sourceNote),
-      drafts: makeDrafts(job, contact, await readProfile()),
+      drafts: makeDrafts(job, contact, await readProfile(), options),
     },
     update: {},
   });

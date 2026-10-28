@@ -68,6 +68,42 @@ test("outreach is role-specific, evidence-backed and distinguishes hiring inboxe
     /point me to the recruiter/,
   );
 });
+test("drafts for an existing connection message them instead of asking to connect", async () => {
+  const p = await readProfile();
+  const job = {
+    title: "Payments Engineer",
+    company: "Acme",
+    description: "Stripe payments CI/CD pipelines",
+    applyUrl: "https://acme.com/jobs/1",
+  };
+  const contact = { name: "Grace Hopper", email: "" };
+  const drafts = makeDrafts(job, contact, p, { connected: true });
+  assert.doesNotMatch(drafts.connection, /Open to connecting/);
+  assert.match(drafts.connection, /^Hi Grace,/);
+  assert.match(drafts.connection, /Payments Engineer role at Acme/);
+  assert.match(drafts.connection, /referring me or pointing me/);
+  assert.ok(drafts.connection.includes(job.applyUrl));
+  assert.ok(drafts.connection.endsWith(`Thanks,\n${p.contact.name}`));
+  assert.ok(
+    p.roles.some((r) =>
+      r.bullets.some((b) =>
+        drafts.connection.includes(
+          b.text.replace(/\*\*/g, "").replace(/—/g, ","),
+        ),
+      ),
+    ),
+    "evidence comes from the verified profile",
+  );
+  assert.ok(drafts.connection.length <= 1900, "fits a LinkedIn message");
+  for (const text of Object.values(drafts)) assert.ok(!text.includes("—"));
+  const plain = makeDrafts(job, contact, p);
+  assert.deepEqual(
+    { ...drafts, connection: "" },
+    { ...plain, connection: "" },
+    "only the connection draft changes",
+  );
+  console.log(`--- connected draft ---\n${drafts.connection}\n---`);
+});
 test("public fetch rejects local networks and respects applicable robots directives", async () => {
   for (const ip of [
     "127.0.0.1",

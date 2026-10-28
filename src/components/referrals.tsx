@@ -20,8 +20,18 @@ type Contact = {
   drafts: Drafts;
   elsewhere: { status: string; job: { title: string; company: string } }[];
 };
+type Connection = {
+  id: string;
+  name: string;
+  position: string;
+  company: string;
+  profileUrl: string;
+  connectedOn: string | null;
+  saved: boolean;
+};
 type Data = {
   contacts: Contact[];
+  connections: Connection[];
   search: { domain: string; lastRunAt: string | null; report: string } | null;
 };
 async function api(url: string, method = "GET", body?: unknown) {
@@ -91,6 +101,7 @@ export default function Referrals({
     }
   };
   const contacts = data?.contacts ?? [];
+  const connections = data?.connections ?? [];
   const due = (c: Contact) =>
     c.followUpAt &&
     new Date(c.followUpAt) <= new Date() &&
@@ -273,6 +284,48 @@ export default function Referrals({
           </button>
         </form>
       )}
+      {connections.length > 0 && (
+        <section
+          className="card referral-box referral-connections"
+          aria-label="Your LinkedIn connections here"
+        >
+          <h4>
+            You know {connections.length}{" "}
+            {connections.length === 1 ? "person" : "people"} at {company}
+          </h4>
+          <ul>
+            {connections.map((c) => (
+              <li key={c.id}>
+                <span>
+                  <a href={c.profileUrl} target="_blank" rel="noreferrer">
+                    {c.name}
+                  </a>
+                  <span className="muted">
+                    {" "}
+                    · {c.position || "Position not shown"}
+                  </span>
+                </span>
+                <button
+                  className="secondary"
+                  disabled={busy || c.saved}
+                  onClick={() =>
+                    act(
+                      () =>
+                        api(`/api/jobs/${jobId}/referrals`, "POST", {
+                          action: "add-connection",
+                          connectionId: c.id,
+                        }),
+                      `${c.name} added as a referral contact. The LinkedIn message draft is ready to review.`,
+                    )
+                  }
+                >
+                  {c.saved ? "Added" : "Add as referral contact"}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <label className="field">
         Show contacts
         <select value={filter} onChange={(e) => setFilter(e.target.value)}>
@@ -419,7 +472,11 @@ function ContactCard({
             setCopied("");
           }}
         >
-          <option value="connection">LinkedIn connection note</option>
+          <option value="connection">
+            {c.sourceKind === "LinkedIn connection"
+              ? "LinkedIn message"
+              : "LinkedIn connection note"}
+          </option>
           <option value="referral">Referral request</option>
           <option value="email">Work email</option>
           <option value="followUp">Follow-up after your first message</option>
@@ -437,7 +494,11 @@ function ContactCard({
       <label className="field">
         Editable message
         <textarea
-          rows={kind === "connection" ? 4 : 11}
+          rows={
+            kind === "connection" && c.sourceKind !== "LinkedIn connection"
+              ? 4
+              : 11
+          }
           value={drafts[kind]}
           onChange={(e) => setDrafts({ ...drafts, [kind]: e.target.value })}
         />
