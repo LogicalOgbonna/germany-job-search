@@ -1046,6 +1046,9 @@ kbd {
 .danger {
   color: #a85c4c !important;
 }
+.warning-copy {
+  color: #a27339 !important;
+}
 .success-copy {
   display: flex;
   align-items: center;

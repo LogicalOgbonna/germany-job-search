@@ -94,8 +94,13 @@ const labels: Record<MailCategory, string> = {
 };
 const passive = (category: MailCategory) =>
   category === "notice" || category === "unrelated";
-const gmail = (threadId: string) =>
-  `https://mail.google.com/mail/u/0/#all/${threadId}`;
+const linkedinPrefix = "linkedin:";
+const threadLink = (threadId: string) =>
+  threadId.startsWith(linkedinPrefix)
+    ? `https://www.linkedin.com/messaging/thread/${encodeURIComponent(threadId.slice(linkedinPrefix.length))}/`
+    : `https://mail.google.com/mail/u/0/#all/${threadId}`;
+const threadLabel = (threadId: string) =>
+  threadId.startsWith(linkedinPrefix) ? "Open on LinkedIn" : "Open in Gmail";
 const sender = (mail: { fromName: string; fromAddress: string }) =>
   mail.fromName ? `${mail.fromName} <${mail.fromAddress}>` : mail.fromAddress;
 const berlinDay = (date: Date) =>
@@ -223,6 +228,23 @@ export function useMailOverview(revision: number) {
     };
   }, [revision]);
   return mail;
+}
+
+// Same lifecycle as the mail overview. A failed load renders nothing.
+export function useLinkedinStatus(revision: number) {
+  const [status, setStatus] = useState<LinkedinStatus | null>(null);
+  useEffect(() => {
+    let active = true;
+    request<LinkedinStatus>("/api/linkedin")
+      .then((data) => {
+        if (active) setStatus(data);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [revision]);
+  return status;
 }
 
 export function ActionNeeded({
@@ -594,11 +616,11 @@ function ReviewRow({
           </button>
           <a
             className="mail-link"
-            href={gmail(item.threadId)}
+            href={threadLink(item.threadId)}
             target="_blank"
             rel="noreferrer"
           >
-            Open in Gmail <ExternalLink size={12} />
+            {threadLabel(item.threadId)} <ExternalLink size={12} />
           </a>
         </div>
       </div>
@@ -676,6 +698,75 @@ export function MailConnection({
   );
 }
 
+export type LinkedinStatus = {
+  connected: boolean;
+  expiresAt: string | null;
+  expiresSoon: boolean;
+  lastCheckedAt: string | null;
+  lastSuccessAt: string | null;
+  lastError: string | null;
+  connections: number;
+};
+
+export function LinkedinConnectionCard({
+  status,
+}: {
+  status: LinkedinStatus | null;
+}) {
+  if (!status) return null;
+  const { connected, expiresAt, expiresSoon, lastCheckedAt, lastError } =
+    status;
+  return (
+    <section className="card mail-card" aria-label="LinkedIn updates">
+      <div className="source-row mail-connection">
+        <span className="company-logo logo-4">
+          <Mail size={18} />
+        </span>
+        <div className="source-name">
+          <strong>LinkedIn updates · read-only</strong>
+          {!connected ? (
+            <span>
+              Not connected. Run <code>npm run linkedin:connect -- --data</code>
+            </span>
+          ) : (
+            <span>
+              {plural(status.connections, "connection")}. Messages checked every
+              hour while Jobdesk is running and email checks are on.
+            </span>
+          )}
+          {connected && expiresSoon && expiresAt && (
+            <small className="warning-copy">
+              Access expires {fullDate(expiresAt)}: run{" "}
+              <code>npm run linkedin:connect -- --data</code>
+            </small>
+          )}
+          {connected && lastError && (
+            <small className="danger">{lastError}</small>
+          )}
+        </div>
+        <div className="source-health">
+          <span
+            className={`tag ${!connected ? "subtle" : lastError || expiresSoon ? "warning" : "positive"}`}
+          >
+            {!connected
+              ? "Not connected"
+              : lastError || expiresSoon
+                ? "Needs attention"
+                : "Connected"}
+          </span>
+          {connected && (
+            <small>
+              {lastCheckedAt
+                ? `Last check ${ago(lastCheckedAt)}`
+                : "Not checked yet"}
+            </small>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function MailTimeline({
   mail,
   onChanged,
@@ -733,11 +824,11 @@ export function MailTimeline({
             <div className="mail-controls">
               <a
                 className="mail-link"
-                href={gmail(entry.threadId)}
+                href={threadLink(entry.threadId)}
                 target="_blank"
                 rel="noreferrer"
               >
-                Open in Gmail <ExternalLink size={12} />
+                {threadLabel(entry.threadId)} <ExternalLink size={12} />
               </a>
               {entry.undoable && (
                 <button
