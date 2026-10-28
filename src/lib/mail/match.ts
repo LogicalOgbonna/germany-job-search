@@ -354,11 +354,25 @@ function evidence(mail: RawMail, classification: Classification): Evidence[] {
     add(employer, "address");
     add(senderName(mail, [employer ?? "", own].filter(Boolean)), "display");
     add(own, "address");
-    // Counts like a display name: it corroborates only when it is exactly the card's company.
-    if (mail.senderCompany) add(mail.senderCompany, "display");
   }
   for (const name of subjectNames(mail.subject)) add(name, "subject");
   return found;
+}
+
+// LinkedIn only: the sender's current company from a stored connection. It confirms a card
+// the mail itself names and never names one: an agency recruiter, or someone who has changed
+// jobs since, writes about other companies. It counts only when it is exactly the card's
+// company and the mail's classified company is not another one.
+function connectionConfirms(
+  mail: RawMail,
+  classification: Classification,
+  key: string,
+): boolean {
+  if (mail.fromMe) return false;
+  const sender = usable(tidy(mail.senderCompany ?? ""));
+  if (!sender || sender.join("") !== key) return false;
+  const named = usable(tidy(classification.company ?? ""));
+  return !named || sameCompany(named, sender, false);
 }
 
 // Every company name the mail offers, best first: classification.company, employerFromAddress,
@@ -618,11 +632,13 @@ export function matchMail(
   const corroborated = (item: BoardApplication) => {
     const tokens = companyTokens(item.company);
     const key = tokens.join("");
-    return found.some(
-      (name) =>
-        sameCompany(tokens, name.tokens, name.fromAddress) &&
-        (name.fromAddress ||
-          (name.tokens.join("") === key && (name.sender || hiringSystem))),
+    return (
+      found.some(
+        (name) =>
+          sameCompany(tokens, name.tokens, name.fromAddress) &&
+          (name.fromAddress ||
+            (name.tokens.join("") === key && (name.sender || hiringSystem))),
+      ) || connectionConfirms(mail, classification, key)
     );
   };
   if (candidates.length === 1) {

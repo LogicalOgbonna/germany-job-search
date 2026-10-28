@@ -6,12 +6,16 @@ import { db } from "../../src/lib/db";
 import { classify } from "../../src/lib/mail/classify";
 import { matchMail, normalizeCompany } from "../../src/lib/mail/match";
 import { classifyByRules } from "../../src/lib/mail/rules";
+import { mailLive, resolveReview, setMailLive } from "../../src/lib/mail/store";
 import type {
   AiClassifier,
   BoardApplication,
   Classification,
 } from "../../src/lib/mail/types";
-import { companyKey } from "../../src/lib/linkedin/connections";
+import {
+  companyKey,
+  companyOfSender,
+} from "../../src/lib/linkedin/connections";
 import type {
   ChangelogEvent,
   LinkedinDataClient,
@@ -59,14 +63,15 @@ const row = (values: {
   CONTENT: values.content,
   FOLDER: "INBOX",
 });
-const turnedDown =
-  "Hi Arinze,\n\nUnfortunately we decided not to move forward with your application.";
+// The message names the company; the sender's stored connection only confirms it.
+const turnedDown = (name: string) =>
+  `Hi Arinze,\n\nThank you for your application to ${name}. Unfortunately we decided not to move forward with your application.`;
 // 1. From a stored connection at card A's company, by profile URL.
 const known = row({
   name: "known",
   from: `Litest${tag} Sender`,
   url: profile(1),
-  content: turnedDown,
+  content: turnedDown(a),
   at: daysAgo(1),
 });
 // The same rejection from someone who is not a connection.
@@ -74,7 +79,7 @@ const stranger = row({
   name: "stranger",
   from: `Litest${tag} Stranger`,
   url: profile(9),
-  content: turnedDown,
+  content: turnedDown(a),
   at: daysAgo(1),
 });
 // From a stored connection at card B's company; LinkedIn gave no profile URL.
@@ -82,7 +87,7 @@ const nameOnly = row({
   name: "name-only",
   from: `Litest${tag} Namesake`,
   url: "",
-  content: turnedDown,
+  content: turnedDown(b),
   at: daysAgo(2),
 });
 // No hiring words, unknown sender: not stored.
@@ -118,7 +123,7 @@ const knownEvent: ChangelogEvent = {
   activity: {
     thread: `urn:li:messagingThread:${conversation("known")}`,
     createdAt: daysAgo(1).valueOf() + 400,
-    content: { content: { string: turnedDown } },
+    content: { content: { string: turnedDown(a) } },
   },
   processedActivity: {
     "author~": {
@@ -136,7 +141,7 @@ const fake = (
 ): LinkedinDataClient => ({
   snapshot: async (domain: SnapshotDomain) => {
     asked.push(`snapshot:${domain}`);
-    return domain === "INBOX" ? rows : null;
+    return domain === "INBOX" ? { rows, complete: true } : null;
   },
   changes: async (since: Date) => {
     asked.push("changes");
@@ -206,6 +211,7 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
   const before = {
     connections: await db.linkedinConnection.count(),
     sync: await db.linkedinSync.findUnique({ where: { id: "linkedin" } }),
+    live: await db.setting.findUnique({ where: { key: "mailLive" } }),
   };
   // Nothing has been written yet: these stop the test before it can reach real data.
   assert.ok(
@@ -228,6 +234,7 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
     0,
     "a LinkedIn test run did not clean up",
   );
+  assert.equal(await mailLive(), false, "the test's live switch is already on");
 
   let strays = 0;
   try {
@@ -264,14 +271,34 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
     });
 
     await step(
-      "0. a scheduled run waits for the mail live switch",
+      "0. scheduled and manual runs wait for the mail live switch",
       async () => {
-        const result = await run(fake(inbox, [knownEvent]), {
-          scheduled: true,
-        });
-        assert.equal(result.skipped, "mail-not-live");
+        for (const scheduled of [true, false]) {
+          const result = await run(fake(inbox, [knownEvent]), { scheduled });
+          assert.equal(result.skipped, "mail-not-live");
+        }
         assert.deepEqual(asked, []);
         assert.equal(await db.linkedinSync.count({ where: { id: syncId } }), 0);
+        // This file's own switch (MAIL_SYNC_ID), never the real one.
+        await setMailLive(true);
+      },
+    );
+
+    await step(
+      "a profile URL that is not stored is not looked up by name",
+      async () => {
+        assert.equal(await companyOfSender("", `Litest${tag} Namesake`), b);
+        assert.equal(
+          await companyOfSender(profile(5), `Litest${tag} Namesake`),
+          null,
+        );
+        assert.equal(
+          await companyOfSender(
+            profile(1).replace(`test-li-${tag}-1`, `TEST-LI-${tag}-1`),
+            "",
+          ),
+          a,
+        );
       },
     );
 
@@ -308,6 +335,22 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
         const fromStranger = await stored(stranger);
         assert.equal(fromStranger.state, "needs_review");
         assert.equal(fromStranger.applicationId, null);
+        assert.match(
+          fromStranger.matchReason,
+          /^The LinkedIn sender's company is unknown or does not match\./,
+        );
+        // A reviewer cannot start a card from a LinkedIn message.
+        await assert.rejects(
+          resolveReview(fromStranger.id, {
+            category: "rejection",
+            applicationId: "new",
+          }),
+          {
+            message:
+              "LinkedIn messages cannot start a card. Add the application by hand, then link this message to it.",
+          },
+        );
+        assert.equal((await stored(stranger)).state, "needs_review");
 
         // 2. No profile URL: the sender is found by name.
         const fromNamesake = await stored(nameOnly);
@@ -412,6 +455,10 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
   assert.deepEqual(
     await db.linkedinSync.findUnique({ where: { id: "linkedin" } }),
     before.sync,
+  );
+  assert.deepEqual(
+    await db.setting.findUnique({ where: { key: "mailLive" } }),
+    before.live,
   );
   assert.equal(await db.mailMessage.count({ where: ours }), 0);
 });

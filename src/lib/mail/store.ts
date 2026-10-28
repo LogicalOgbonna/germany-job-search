@@ -10,7 +10,7 @@ import {
 import type { ParsedInterview } from "../interviews/types";
 import { aiClassifier } from "./ai";
 import { classify, confirm } from "./classify";
-import { decide, needsSecondReader } from "./decide";
+import { decide, needsSecondReader, startsNoCard } from "./decide";
 import {
   gmailClient,
   MailAuthError,
@@ -2067,6 +2067,8 @@ export async function resolveReview(
       return;
     }
     if (input.applicationId === "new") {
+      const refused = startsNoCard(mail);
+      if (refused) throw new Error(refused);
       const match: MatchResult = {
         kind: "none",
         reason: "new card, your choice",

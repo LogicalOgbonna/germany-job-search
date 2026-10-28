@@ -53,6 +53,16 @@ type Input = {
   now: Date;
 };
 
+const fromLinkedin = (mail: RawMail) => mail.gmailId.startsWith("linkedin:");
+
+// Why a reviewer may not start a new card from this mail, or null when they may. A LinkedIn
+// message is a recruiter's word, not proof of an application, and its sender is a person.
+export function startsNoCard(mail: RawMail): string | null {
+  return fromLinkedin(mail)
+    ? "LinkedIn messages cannot start a card. Add the application by hand, then link this message to it."
+    : null;
+}
+
 // True when the decision would change or create a card on a verdict the two readers
 // have not agreed on. A plain receipt from a hiring system that states the role is let
 // through on the rules alone, so the history import can create those cards without Claude.
@@ -118,7 +128,11 @@ function plan(input: Input): Decision {
   if (match.kind === "ambiguous")
     return review(`Several applications could match: ${match.reason}`);
   if (match.kind === "unique" && match.corroborated === false)
-    return review("The sender does not confirm the company");
+    return review(
+      fromLinkedin(mail)
+        ? "The LinkedIn sender's company is unknown or does not match"
+        : "The sender does not confirm the company",
+    );
   const target = categoryStatus[category];
   // Only stage mail carries a next step, and only while it is recent enough to act on.
   const carries =
@@ -131,7 +145,7 @@ function plan(input: Input): Decision {
   };
   if (match.kind === "none") {
     // Recruiter cold outreach on LinkedIn is not an application.
-    if (mail.gmailId.startsWith("linkedin:"))
+    if (fromLinkedin(mail))
       return review("LinkedIn messages do not create cards");
     const status = category === "confirmation" ? "submitted" : target;
     if (confidence !== "high" || !status)

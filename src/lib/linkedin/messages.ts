@@ -1,49 +1,43 @@
 import { createHash } from "node:crypto";
+import { plain } from "../connectors";
+import { capBody, tidy } from "../mail/gmail";
 import type { RawMail } from "../mail/types";
+import { linkedinUrl } from "../referrals/domain";
 
 const keptFolders = new Set(["INBOX", "ARCHIVE"]);
-const entities: Record<string, string> = {
-  "&nbsp;": " ",
-  "&amp;": "&",
-  "&lt;": "<",
-  "&gt;": ">",
-  "&quot;": '"',
-  "&#39;": "'",
-};
-const text = (html: string) =>
-  html
-    .replace(/<br\s*\/?>|<\/p>/gi, "\n")
-    .replace(/<[^>]+>/g, " ")
-    .replace(
-      /&[a-z#0-9]+;/gi,
-      (entity) => entities[entity.toLowerCase()] ?? " ",
-    )
-    .replace(/[ \t]+/g, " ")
-    .replace(/ ?\n ?/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim()
-    .slice(0, 20000);
+// The snapshot's CONTENT is HTML; the changelog's text is plain and is kept as written.
+const fromHtml = (html: string) => capBody(tidy(plain(html)));
+const fromText = (text: string) => capBody(tidy(text));
 const sameName = (a: string, b: string) =>
   a.trim().toLowerCase() === b.trim().toLowerCase();
+// A canonical LinkedIn /in/ URL, lower-cased as LinkedIn messages carry them, or "". An "@"
+// would make the mail matcher read the URL as an email address.
+const profile = (url: string) =>
+  url.includes("@") ? "" : linkedinUrl(url.trim()).toLowerCase();
+// The export writes "2026-10-26 18:06:07 UTC"; a date without the zone is UTC as well.
+function snapshotDate(value: string): Date {
+  const stamp = value
+    .trim()
+    .replace(/\s*UTC$/i, "")
+    .replace(" ", "T");
+  return new Date(/(?:Z|[+-]\d\d:?\d\d)$/i.test(stamp) ? stamp : `${stamp}Z`);
+}
 
 // One id for one message, whichever source it was read from. The changelog has milliseconds
-// and the snapshot only seconds, so time is floored to the second.
+// and the snapshot only seconds, so time is floored to the second; the two sources render
+// names and markup differently, so the text counts by its letters and digits alone.
 export function messageId(input: {
   conversation: string;
-  sender: string;
   at: Date;
   text: string;
 }): string {
   const second = Math.floor(input.at.getTime() / 1000);
+  const text = input.text
+    .normalize("NFC")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "");
   return `linkedin:${createHash("sha256")
-    .update(
-      [
-        input.conversation,
-        input.sender.trim().toLowerCase(),
-        second,
-        input.text,
-      ].join("\u0000"),
-    )
+    .update([input.conversation, second, text].join("\u0000"))
     .digest("hex")}`;
 }
 
@@ -58,14 +52,14 @@ function build(input: {
   return {
     gmailId: messageId({
       conversation: input.conversation,
-      sender: input.sender,
       at: input.at,
       text: input.body,
     }),
     threadId: `linkedin:${input.conversation}`,
-    fromAddress: input.profileUrl.toLowerCase(),
+    fromAddress: profile(input.profileUrl),
     fromName: input.sender,
-    subject: input.title || `LinkedIn message from ${input.sender}`,
+    // The sender's name stays in fromName: in the subject it would be read as a company.
+    subject: input.title || "LinkedIn message",
     receivedAt: input.at,
     bodyText: input.body,
     fromMe: false,
@@ -78,8 +72,8 @@ export function fromSnapshot(
   me: string,
 ): RawMail | null {
   const sender = (row.FROM ?? "").trim();
-  const body = text(row.CONTENT ?? "");
-  const at = new Date((row.DATE ?? "").replace(" UTC", "Z").replace(" ", "T"));
+  const body = fromHtml(row.CONTENT ?? "");
+  const at = snapshotDate(row.DATE ?? "");
   if (
     !keptFolders.has(row.FOLDER) ||
     !sender ||
@@ -112,8 +106,10 @@ export function fromChangelog(event: any, me: string): RawMail | null {
     /^urn:li:messagingThread:/,
     "",
   );
-  const body = text(
-    activity.content?.content?.string ?? activity.content?.fallback ?? "",
+  const body = fromText(
+    String(
+      activity.content?.content?.string ?? activity.content?.fallback ?? "",
+    ),
   );
   const at = new Date(Number(activity.createdAt));
   if (
@@ -127,9 +123,10 @@ export function fromChangelog(event: any, me: string): RawMail | null {
   return build({
     conversation,
     sender,
-    profileUrl: author.vanityName
-      ? `https://www.linkedin.com/in/${author.vanityName}`
-      : "",
+    profileUrl:
+      author.vanityName && !String(author.vanityName).includes("@")
+        ? `https://www.linkedin.com/in/${encodeURIComponent(String(author.vanityName))}`
+        : "",
     title: "",
     at,
     body,

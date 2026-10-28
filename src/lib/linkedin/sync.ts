@@ -85,7 +85,7 @@ export async function syncLinkedin(
     ai?: AiClassifier | null; // undefined: the Claude classifier when a key is set
     now?: Date;
     syncId?: string; // tests use their own row
-    scheduled?: boolean;
+    scheduled?: boolean; // the worker's run; manual runs wait for the same switch too
     me?: string; // the member's name; read from cv/contact.json when not given
   } = {},
 ): Promise<LinkedinCounts & { skipped: LinkedinSkip | null }> {
@@ -101,10 +101,9 @@ export async function syncLinkedin(
     ignored: 0,
     failed: 0,
   };
-  // LinkedIn messages change cards through the same rules as mail, so scheduled checks wait
-  // for the same switch.
-  if (options.scheduled && !(await mailLive()))
-    return { ...counts, skipped: "mail-not-live" };
+  // LinkedIn messages change cards through the same rules as mail, so every check, scheduled
+  // or by hand, waits for the same switch (as npm run mail:sync does).
+  if (!(await mailLive())) return { ...counts, skipped: "mail-not-live" };
   const token = options.client
     ? null
     : await readLinkedinToken(linkedinTokenPath("data"));
@@ -146,11 +145,16 @@ export async function syncLinkedin(
     let snapshotRead = false;
     if (snapshotDue) {
       const people = await client.snapshot("CONNECTIONS");
-      if (people) counts.connections = await refreshConnections(people);
+      // A snapshot cut short still adds and updates connections, but removes none.
+      if (people)
+        counts.connections = await refreshConnections(
+          people.rows,
+          people.complete,
+        );
       const inbox = await client.snapshot("INBOX");
       if (inbox) {
         snapshotRead = true;
-        for (const row of inbox) keep(fromSnapshot(row, me));
+        for (const row of inbox.rows) keep(fromSnapshot(row, me));
       }
     }
     for (const event of await client.changes(since))

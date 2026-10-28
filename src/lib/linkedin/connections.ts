@@ -80,9 +80,34 @@ const differs = (stored: ConnectionRecord, next: ConnectionRecord) =>
   stored.email !== next.email ||
   stored.connectedOn?.getTime() !== next.connectedOn?.getTime();
 
-// Replaces the stored connections with a complete snapshot. Only new and changed rows are
-// written, so a repeat run over ~1,500 connections is one read and one delete.
-export async function refreshConnections(rows: Record<string, string>[]) {
+// What a snapshot changes: new rows, changed rows, and (only for a complete snapshot)
+// stored connections it no longer lists. A partial snapshot cannot tell a removed connection
+// from one on a page that was never read.
+export function connectionWrites(
+  stored: ConnectionRecord[],
+  records: ConnectionRecord[],
+  complete: boolean,
+) {
+  const known = new Map(stored.map((c) => [c.profileUrl, c]));
+  const listed = new Set(records.map((r) => r.profileUrl));
+  return {
+    create: records.filter((r) => !known.has(r.profileUrl)),
+    update: records.filter((r) => {
+      const old = known.get(r.profileUrl);
+      return !!old && differs(old, r);
+    }),
+    remove: complete
+      ? stored.map((c) => c.profileUrl).filter((url) => !listed.has(url))
+      : [],
+  };
+}
+
+// Brings the stored connections in line with a snapshot. Only new and changed rows are
+// written, so a repeat run over ~1,500 connections is one read and at most one delete.
+export async function refreshConnections(
+  rows: Record<string, string>[],
+  complete: boolean,
+) {
   const records = [
     ...new Map(
       rows
@@ -95,23 +120,21 @@ export async function refreshConnections(rows: Record<string, string>[]) {
   if (!records.length) return 0;
   await db.$transaction(
     async (tx) => {
-      const stored = new Map(
-        (await tx.linkedinConnection.findMany()).map((c) => [c.profileUrl, c]),
+      const writes = connectionWrites(
+        await tx.linkedinConnection.findMany(),
+        records,
+        complete,
       );
-      await tx.linkedinConnection.deleteMany({
-        where: { profileUrl: { notIn: records.map((r) => r.profileUrl) } },
-      });
-      await tx.linkedinConnection.createMany({
-        data: records.filter((r) => !stored.has(r.profileUrl)),
-      });
-      for (const record of records) {
-        const old = stored.get(record.profileUrl);
-        if (old && differs(old, record))
-          await tx.linkedinConnection.update({
-            where: { profileUrl: record.profileUrl },
-            data: record,
-          });
-      }
+      if (writes.remove.length)
+        await tx.linkedinConnection.deleteMany({
+          where: { profileUrl: { in: writes.remove } },
+        });
+      await tx.linkedinConnection.createMany({ data: writes.create });
+      for (const record of writes.update)
+        await tx.linkedinConnection.update({
+          where: { profileUrl: record.profileUrl },
+          data: record,
+        });
     },
     { timeout: 120_000, maxWait: 30_000 },
   );
@@ -130,14 +153,16 @@ export async function connectionsAt(company: string) {
   return rank(found.filter((c) => keysMatch(c.company, company)));
 }
 
-// For LinkedIn messages: the sender's company, by profile URL, else by exact name.
+// For LinkedIn messages: the sender's company, by profile URL. Only a message without a
+// profile URL is looked up by exact name: a URL that is not stored is someone who is not a
+// connection, however their name reads.
 export async function companyOfSender(profileUrl: string, name: string) {
-  const byUrl = profileUrl
-    ? await db.linkedinConnection.findUnique({
-        where: { profileUrl: profileKey(profileUrl) },
-      })
-    : null;
-  if (byUrl) return byUrl.company || null;
+  if (profileUrl.trim()) {
+    const byUrl = await db.linkedinConnection.findUnique({
+      where: { profileUrl: profileKey(profileUrl) },
+    });
+    return byUrl?.company || null;
+  }
   if (!name.trim()) return null;
   const byName = await db.linkedinConnection.findMany({
     where: { name: { equals: name.trim(), mode: "insensitive" } },

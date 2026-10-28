@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   companyKey,
+  connectionWrites,
   keysMatch,
   rank,
   toConnection,
@@ -73,4 +74,30 @@ test("engineers come first, then managers and founders, then recruiters", () => 
     "Talent Acquisition Partner",
     "Head of Marketing",
   ]);
+});
+
+test("only a complete snapshot removes connections that are missing from it", () => {
+  const person = (n: number, company = "Personio") =>
+    toConnection({
+      "First Name": "Person",
+      "Last Name": String(n),
+      URL: `https://www.linkedin.com/in/person-${n}`,
+      Company: company,
+    })!;
+  const stored = [person(1), person(2), person(3)];
+  const rows = [person(2, "Grafana Labs"), person(3), person(4)];
+  const complete = connectionWrites(stored, rows, true);
+  assert.deepEqual(
+    complete.create.map((r) => r.profileUrl),
+    [person(4).profileUrl],
+  );
+  assert.deepEqual(
+    complete.update.map((r) => r.profileUrl),
+    [person(2).profileUrl],
+  );
+  assert.deepEqual(complete.remove, [person(1).profileUrl]);
+  const partial = connectionWrites(stored, rows, false);
+  assert.deepEqual(partial.remove, []);
+  assert.deepEqual(partial.create, complete.create);
+  assert.deepEqual(partial.update, complete.update);
 });

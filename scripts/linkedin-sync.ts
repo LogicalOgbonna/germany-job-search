@@ -11,7 +11,7 @@ async function main() {
         ? "A LinkedIn check is already running. Try again in a few minutes."
         : skipped === "not-connected"
           ? "LinkedIn is not connected. Run npm run linkedin:connect -- --data first."
-          : "Nothing was checked: mail checks are not live yet.",
+          : "Nothing was checked: mail checks are off until the Gmail history import is applied (npm run mail:backfill -- --apply).",
     );
     process.exitCode = 1;
     return;

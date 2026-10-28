@@ -20,58 +20,99 @@ export type ChangelogEvent = {
   processedActivity?: any;
 };
 
+export type Snapshot = {
+  rows: any[];
+  // False when paging was cut short (a later page went missing, or the page limit was
+  // reached): the rows are then not the whole domain.
+  complete: boolean;
+};
+
+// Retried as the Gmail client retries: rate limits, 5xx, network failures and timeouts get
+// four more attempts, waiting as long as Retry-After asks (at most a minute).
+const backoff = [2000, 4000, 8000, 16000];
+// The changelog keeps 28 days of events.
+const changelogDays = 28;
+
+function retryAfter(response: Response): number | undefined {
+  const value = response.headers.get("retry-after");
+  if (!value) return undefined;
+  const seconds = /^\d+$/.test(value.trim())
+    ? Number(value)
+    : (Date.parse(value) - Date.now()) / 1000;
+  return Number.isFinite(seconds) ? Math.max(0, seconds) : undefined;
+}
+
 export function linkedinDataClient(options: {
   token: string;
   fetch?: typeof fetch;
   sleep?: (ms: number) => Promise<void>;
+  now?: () => Date;
 }) {
   const send = options.fetch ?? fetch;
   const sleep =
     options.sleep ??
     ((ms: number) => new Promise((done) => setTimeout(done, ms)));
+  const now = options.now ?? (() => new Date());
   // null for 404, which LinkedIn uses for "no data (yet)" and for "past the last page".
   async function get(path: string): Promise<any | null> {
     for (let attempt = 0; ; attempt++) {
-      const response = await send(`${api}${path}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${options.token}`,
-          "LinkedIn-Version": version,
-        },
-        signal: AbortSignal.timeout(30000),
-      });
-      if (response.ok) return response.json();
-      if (response.status === 404) return null;
-      if (response.status === 401 || response.status === 403)
-        throw new LinkedinAuthError(
-          "Reconnect LinkedIn: run npm run linkedin:connect -- --data",
-        );
-      if ((response.status === 429 || response.status >= 500) && attempt < 3) {
-        await sleep(2000 * 2 ** attempt);
-        continue;
+      let response: Response | null = null;
+      let error: unknown;
+      try {
+        response = await send(`${api}${path}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${options.token}`,
+            "LinkedIn-Version": version,
+          },
+          signal: AbortSignal.timeout(30000),
+          redirect: "error",
+          cache: "no-store",
+        });
+        if (response.ok) return await response.json();
+      } catch (thrown) {
+        // A network failure or a timeout.
+        error = thrown;
       }
-      throw new Error(`LinkedIn answered ${response.status}`);
+      if (response && !response.ok) {
+        if (response.status === 404) return null;
+        if (response.status === 401 || response.status === 403)
+          throw new LinkedinAuthError(
+            "Reconnect LinkedIn: run npm run linkedin:connect -- --data",
+          );
+        error = new Error(`LinkedIn answered ${response.status}`);
+        if (response.status !== 429 && response.status < 500) throw error;
+      }
+      if (attempt >= backoff.length) throw error;
+      const asked = response && !response.ok ? retryAfter(response) : undefined;
+      await sleep(
+        asked === undefined ? backoff[attempt] : Math.min(asked, 60) * 1000,
+      );
     }
   }
   return {
     // All rows of one domain, or null when LinkedIn has not prepared the domain yet.
-    async snapshot(domain: SnapshotDomain): Promise<any[] | null> {
+    async snapshot(domain: SnapshotDomain): Promise<Snapshot | null> {
       const rows: any[] = [];
       for (let start = 0; start < pageLimit; start++) {
         const body = await get(
           `/memberSnapshotData?q=criteria&domain=${domain}&start=${start}`,
         );
-        if (!body) return start === 0 ? null : rows;
+        if (!body) return start === 0 ? null : { rows, complete: false };
         rows.push(...(body.elements?.[0]?.snapshotData ?? []));
         if (!body.paging?.links?.some((link: any) => link.rel === "next"))
-          return rows;
+          return { rows, complete: true };
       }
-      throw new Error(`LinkedIn ${domain} did not stop paging`);
+      return { rows, complete: false };
     },
-    // Events processed at or after `since`, oldest first, as LinkedIn recommends paging them.
+    // Events processed at or after `since` (at most 28 days back), oldest first, as LinkedIn
+    // recommends paging them.
     async changes(since: Date): Promise<ChangelogEvent[]> {
       const events: ChangelogEvent[] = [];
-      let start = since.getTime();
+      let start = Math.max(
+        since.getTime(),
+        now().getTime() - changelogDays * 86_400_000,
+      );
       for (let page = 0; page < pageLimit; page++) {
         const body = await get(
           `/memberChangeLogs?q=memberAndApplication&startTime=${start}&count=10`,
@@ -79,8 +120,12 @@ export function linkedinDataClient(options: {
         const batch: ChangelogEvent[] = body?.elements ?? [];
         if (!batch.length) return events;
         events.push(...batch);
-        start =
+        const next =
           Math.max(...batch.map((event) => Number(event.processedAt) || 0)) + 1;
+        // A page whose events carry no later time would be asked for again and again.
+        if (next <= start)
+          throw new Error("LinkedIn changelog did not move forward");
+        start = next;
       }
       throw new Error("LinkedIn changelog did not stop paging");
     },
