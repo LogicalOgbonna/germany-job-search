@@ -8,7 +8,7 @@
     "build": "prisma generate && next build",
     "start": "next start --hostname 127.0.0.1",
     "setup": "node scripts/setup.mjs",
-    "db:migrate": "prisma migrate deploy",
+    "db:migrate": "node scripts/db-backup.mjs && prisma migrate deploy",
     "import": "tsx scripts/import.ts",
     "import:boards": "tsx scripts/import-boards.ts",
     "mail:connect": "tsx scripts/mail-connect.ts",
@@ -30,7 +30,9 @@
     "dev:url": "portless get jobdesk --no-worktree",
     "test:referrals:browser": "node tests/referrals-browser.mjs",
     "linkedin:resolve": "tsx scripts/linkedin-resolve.ts",
-    "linkedin:connect": "tsx scripts/linkedin-connect.ts"
+    "linkedin:connect": "tsx scripts/linkedin-connect.ts",
+    "linkedin:sync": "tsx scripts/linkedin-sync.ts",
+    "db:backup": "node scripts/db-backup.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
