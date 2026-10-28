@@ -1,0 +1,344 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model Job {
+  id           String   @id @default(cuid())
+  canonicalKey String   @unique
+  title        String
+  company      String
+  location     String
+  countries    String[]
+  remote       Boolean  @default(false)
+  description  String
+  applyUrl     String
+  salary       String?
+  track        String
+  skills       String[]
+  score        Int
+  reasons      String[]
+  eligibility  String   @default("unknown")
+  eligibilityNote String @default("Work authorization and location requirements need review.")
+  liveStatus   String   @default("unverified")
+  contentHash  String
+  publishedAt  DateTime?
+  firstSeenAt  DateTime @default(now())
+  lastSeenAt   DateTime @default(now())
+  checkedAt    DateTime?
+  listings     Listing[]
+  application  Application?
+  documents    Document[]
+  referrals    Referral[]
+  referralSearch ReferralSearch?
+  @@index([score, firstSeenAt])
+  @@index([track, liveStatus])
+}
+model Source {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  kind        String
+  board       String   @default("")
+  region      String   @default("global")
+  enabled     Boolean  @default(false)
+  intervalMinutes Int  @default(240)
+  nextRunAt   DateTime @default(now())
+  lastSuccessAt DateTime?
+  lastError   String?
+  leaseUntil  DateTime?
+  runs        SourceRun[]
+  listings    Listing[]
+}
+model Listing {
+  id         String @id @default(cuid())
+  sourceId   String
+  externalId String
+  url        String
+  jobId      String
+  seenAt     DateTime @default(now())
+  source     Source @relation(fields: [sourceId], references: [id])
+  job        Job @relation(fields: [jobId], references: [id])
+  @@unique([sourceId, externalId])
+}
+model SourceRun {
+  id         String @id @default(cuid())
+  sourceId   String
+  source     Source @relation(fields: [sourceId], references: [id])
+  status     String @default("running")
+  startedAt  DateTime @default(now())
+  finishedAt DateTime?
+  fetched    Int @default(0)
+  added      Int @default(0)
+  message    String?
+  @@index([startedAt])
+}
+model Application {
+  id          String @id @default(cuid())
+  jobId       String @unique
+  job         Job @relation(fields: [jobId], references: [id])
+  status      String @default("queued")
+  eligibilityReviewed Boolean @default(false)
+  notes       String @default("")
+  followUpAt  DateTime?
+  submittedAt DateTime?
+  evidence    String?
+  origin      String @default("jobdesk")
+  nextStep    String?
+  nextStepDueAt DateTime?
+  lastMailAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  events      ApplicationEvent[]
+  mail        MailMessage[]
+  interviews  Interview[]
+  @@index([submittedAt])
+}
+model ApplicationEvent {
+  id            String @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+  status        String
+  note          String?
+  mailMessageId String?
+  mailMessage   MailMessage? @relation(fields: [mailMessageId], references: [id], onDelete: SetNull)
+  previous      Json?
+  at            DateTime @default(now())
+}
+model MailMessage {
+  id            String @id @default(cuid())
+  gmailId       String @unique
+  threadId      String
+  fromAddress   String
+  fromName      String @default("")
+  subject       String
+  receivedAt    DateTime
+  bodyText      String
+  fromMe        Boolean @default(false)
+  category      String
+  confidence    String
+  decidedBy     String
+  evidenceQuote String?
+  company       String?
+  role          String?
+  nextStep      String?
+  deadline      DateTime?
+  applicationId String?
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  matchReason   String @default("")
+  state         String
+  proposal      Json?
+  correctedFrom String?
+  createdAt     DateTime @default(now())
+  events        ApplicationEvent[]
+  @@index([threadId])
+  @@index([state, receivedAt])
+  @@index([applicationId])
+}
+model MailSync {
+  id            String @id
+  email         String?
+  nextRunAt     DateTime @default(now())
+  lastCheckedAt DateTime?
+  lastSuccessAt DateTime?
+  lastError     String?
+  leaseUntil    DateTime?
+  lastCounts    Json?
+}
+model Document {
+  id          String @id @default(cuid())
+  jobId       String
+  job         Job @relation(fields: [jobId], references: [id])
+  fingerprint String
+  profileHash String
+  jobHash     String
+  cvHtml      String
+  letterHtml  String
+  evidenceIds String[]
+  approvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  @@unique([jobId, fingerprint])
+}
+model Setting {
+  key   String @id
+  value Json
+}
+
+model TechEvent {
+  id String @id @default(cuid())
+  canonicalKey String @unique
+  title String
+  url String
+  description String
+  kind String
+  city String
+  country String
+  format String
+  startsAt DateTime
+  endsAt DateTime
+  allDay Boolean @default(true)
+  timezone String?
+  topics String[]
+  score Int
+  reasons String[]
+  cost String @default("Price not published")
+  free Boolean @default(false)
+  eligibility String @default("Check the organizer's participation requirements.")
+  status String @default("listed")
+  firstSeenAt DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  listings EventListing[]
+  plan EventPlan?
+  @@index([startsAt, score])
+}
+
+model EventSource {
+  id String @id @default(cuid())
+  key String @unique
+  name String
+  kind String
+  url String
+  scope String @default("")
+  enabled Boolean @default(true)
+  intervalMinutes Int @default(720)
+  nextRunAt DateTime @default(now())
+  lastSuccessAt DateTime?
+  lastError String?
+  leaseUntil DateTime?
+  listings EventListing[]
+  runs EventSourceRun[]
+}
+
+model EventListing {
+  id String @id @default(cuid())
+  sourceId String
+  externalId String
+  eventId String
+  seenAt DateTime @default(now())
+  source EventSource @relation(fields: [sourceId], references: [id])
+  event TechEvent @relation(fields: [eventId], references: [id])
+  @@unique([sourceId, externalId])
+}
+
+model EventSourceRun {
+  id String @id @default(cuid())
+  sourceId String
+  source EventSource @relation(fields: [sourceId], references: [id])
+  status String @default("running")
+  startedAt DateTime @default(now())
+  finishedAt DateTime?
+  fetched Int @default(0)
+  matched Int @default(0)
+  added Int @default(0)
+  message String?
+  @@index([startedAt])
+}
+
+model EventPlan {
+  id String @id @default(cuid())
+  eventId String @unique
+  event TechEvent @relation(fields: [eventId], references: [id])
+  status String @default("saved")
+  notes String @default("")
+  contactsMet Int @default(0)
+  followUpAt DateTime?
+  followUpDone Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ReferralSearch {
+  jobId String @id
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  domain String @default("")
+  lastRunAt DateTime?
+  leaseUntil DateTime?
+  report String @default("")
+}
+
+model Referral {
+  id String @id @default(cuid())
+  jobId String
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  identity String
+  name String
+  title String @default("")
+  email String @default("")
+  linkedin String @default("")
+  sourceUrl String
+  sourceKind String
+  sourceNote String @default("")
+  emailStatus String @default("Not verified")
+  employmentReviewed Boolean @default(false)
+  priority Int @default(0)
+  status String @default("saved")
+  notes String @default("")
+  followUpAt DateTime?
+  contactedAt DateTime?
+  drafts Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([jobId, identity])
+  @@index([email])
+  @@index([linkedin])
+  @@index([status, followUpAt])
+}
+model Interview {
+  id                  String   @id @default(cuid())
+  applicationId       String
+  application         Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  stage               String   @default("other")
+  title               String   @default("")
+  startsAt            DateTime?
+  endsAt              DateTime?
+  timezone            String   @default("Europe/Berlin")
+  interviewerTimezone String?
+  interviewers        Json     @default("[]")
+  meetingUrl          String?
+  eventUrl            String?
+  rescheduleUrl       String?
+  status              String   @default("scheduled")
+  sourceMailId        String?
+  prep                Json?
+  prepStatus          String   @default("none")
+  prepError           String?
+  prepGeneratedAt     DateTime?
+  checklist           Json     @default("[]")
+  notes               String   @default("")
+  debrief             String   @default("")
+  nextSteps           String   @default("")
+  thankYouDraft       String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  questions           InterviewQuestion[]
+  practice            PracticeSession[]
+  @@index([applicationId])
+  @@index([startsAt])
+}
+model InterviewQuestion {
+  id          String  @id @default(cuid())
+  interviewId String
+  interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  position    Int     @default(0)
+  question    String
+  outline     String  @default("")
+  evidence    Json    @default("[]")
+  userNotes   String  @default("")
+  ready       Boolean @default(false)
+  stale       Boolean @default(false)
+  @@index([interviewId, position])
+}
+model PracticeSession {
+  id          String   @id @default(cuid())
+  interviewId String
+  interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  stage       String
+  plannedQuestions Int @default(5)
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  turns       Json     @default("[]")
+  summary     Json?
+  @@index([interviewId])
+}

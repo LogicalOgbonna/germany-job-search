@@ -4,8 +4,27 @@ This is the authoritative source of truth for all professional experience. Every
 
 ---
 
+## Wunderflats — Senior Software Engineer
+**Apr 2026 - Sep 2026**
+
+- Worked on payment functionality using Stripe Connect.
+- Restructured a slow CI/CD pipeline into smaller parts and reduced unnecessary test runs, cutting pipeline wait time by approximately 30%.
+- Built an AI agent running asynchronously on Google Cloud Run to pick up Jira tickets, identify the affected microservices and potential blast radius, investigate Google Cloud logs to trace where issues originated, reproduce bugs, implement fixes, open pull requests, and update the Jira tickets. For smaller production bugs, reduced the time to produce a proposed fix from roughly two days to minutes.
+- Led customer-focused engineering discussions, evaluating how proposed changes would affect the user experience.
+- Introduced Google One Tap to simplify login and improve user retention.
+- Removed dead-end screens and simplified UI navigation to improve the booking flow and booking rates.
+- Maintained the existing codebase and refactored components to improve maintainability.
+
+**Confirmed technologies:** Stripe Connect, Google One Tap, CI/CD pipelines, AI agents, Jira, Google Cloud Run, Google Cloud logs, microservice issue triage
+
+**Reason for leaving (confirmed by the candidate on 19 October 2026):** an organisational restructuring linked to AI adoption, in which more than half of the team was laid off, including the candidate's role. Use this for "why did you leave" answers; state it plainly, without blame or criticism of the company, and do not add details (dates, numbers, severance) the candidate has not confirmed.
+
+Profile maintenance note (not application copy): The candidate estimates the CI/CD wait-time reduction at approximately 30%, achieved through pipeline restructuring and reducing/removing unnecessary test runs; do not present it as an exact measurement, a reduction in deployment cost, or proof that test coverage was unchanged. The candidate reports that the asynchronous Jira-to-pull-request AI workflow brought smaller production bug fixes from roughly two days to minutes. Scope this outcome to producing proposed fixes for smaller bugs; do not claim autonomous merging, deployment, resolution of every production incident, a measured average, or an exact percentage speedup. Retention and booking improvements are qualitative, with no confirmed percentages. Programming languages, frontend/backend frameworks, agent framework/model/provider, CI/CD provider, employment type, and location remain unconfirmed. Do not infer them from other roles.
+
+---
+
 ## Genentech (Roche) — Frontend Engineer
-**Full-time | May 2023 - Present | San Francisco, CA (Remote)**
+**Full-time | May 2023 - Jan 2026 | San Francisco, CA (Remote)**
 
 - Spearheaded the redesign of the main product for connecting and transferring clinical trial sites' data to various upstream EHR systems, migrating from a Vue.js web application to a Chrome extension in React.
 - Maintained and extended the existing Vue.js codebase during the migration period, fixing bugs and shipping features in parallel with the React rebuild.
@@ -13,11 +32,13 @@ This is the authoritative source of truth for all professional experience. Every
 - Implemented authentication and authorization workflows on the frontend using JWT-based flows, securely handling access and refresh tokens with HTTP-only cookies. Integrated login, signup, and role-based access control in the UI, protected client-side routes, and ensured secure token refresh handling for seamless user sessions. Collaborated closely with backend engineers to align on auth strategies and enforce permission-based UI rendering.
 - Introduced Redux for state management and React Query for request caching, optimizing the build pipeline and refactoring legacy React code from class components to functional components, improving developer experience.
 - Increased stakeholder confidence by writing end-to-end tests with Playwright in the CI/CD pipeline, publishing test results on GitHub Pages using the Allure Reports plugin, and sending Slack notifications with links to generated test results on every push.
-- Co-developed a full-stack Next.js chat widget powered by a Retrieval-Augmented Generation (RAG) system using OpenAI's GPT models, LangChain, LangGraph for agent orchestration, Vercel AI SDK, and Chroma vector database, with LangSmith for tracing and evaluation, enabling users to connect their data sources, embed the widget on external sites, and query their data in real time via a conversational interface.
+- Co-developed a full-stack Next.js chat widget powered by a Retrieval-Augmented Generation (RAG) system, with the RAG pipeline and backend written in Python, using OpenAI's GPT models, LangChain, LangGraph for agent orchestration, Vercel AI SDK, and Chroma vector database, with LangSmith for tracing and evaluation, enabling users to connect their data sources, embed the widget on external sites, and query their data in real time via a conversational interface.
 - Architected a reusable design system in React and Radix UI that improved UI consistency, accessibility, and developer efficiency across products.
 - Mentored a team of two junior developers (interns), fostering a culture of technical excellence.
 
-**Key technologies:** React, TypeScript, Next.js, Vue.js, Redux, React Query, Radix UI, Tailwind CSS, Playwright, Allure Reports, GitHub Actions, JWT, OpenAI API, LangChain, LangGraph, LangSmith, Vercel AI SDK, Chroma, Lighthouse, Chrome DevTools
+**Key technologies:** React, TypeScript, Next.js, Vue.js, Redux, React Query, Radix UI, Tailwind CSS, Playwright, Allure Reports, GitHub Actions, JWT, Python, OpenAI API, LangChain, LangGraph, LangSmith, Vercel AI SDK, Chroma, Lighthouse, Chrome DevTools
+
+Profile maintenance note (not application copy): On 13 October 2026 the candidate confirmed writing Python professionally at Genentech for the RAG pipeline and backend of the chat widget (LangChain, LangGraph, Chroma, LangSmith). Duration was not confirmed. Do not state years of Python experience, and do not claim Django, FastAPI, Flask, model training, or Python at any other employer; outside Genentech, Python remains personal-project experience.
 
 ---
 

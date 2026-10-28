@@ -1,0 +1,15 @@
+# Referrals in Jobdesk
+
+Open a job and choose **Referrals**. Enter the employer's confirmed website domain and choose **Discover public contacts**. Engineers and engineering managers rank above recruiters when a source supplies a relevant title. Contacts with unknown titles remain available for review.
+
+Discovery scans the stored job description, the company homepage, and up to three linked about/team/careers/contact pages. It collects published work emails on the employer's domain and public LinkedIn profile links. Hiring inboxes are labeled separately; support, sales and other generic inboxes are excluded. No addresses are guessed and no private mailbox enrichment is used. Company pages are fetched on demand, not on a background schedule. Repeat scans are rate limited to once a minute per job and preserve edited drafts, notes and outreach status.
+
+Use **Search LinkedIn** or **Search public profiles** to find additional engineers, managers or recruiters. **Add a contact** saves a profile, source URL and optional published work email. LinkedIn itself is not scraped: there is no logged-in browser automation or general employee directory API in this version. No contact-data provider account or paid API is needed. Coverage depends on what employers publish, and a scan may find no suitable people or emails. The source report distinguishes a failed page from an empty result. Current employment and deliverability are not automatically verified.
+
+Each contact gets editable connection, referral request, email and follow-up drafts, based on the particular vacancy and evidence from `cv/experience.md`. Source-derived names may be incomplete. Check the greeting, employer and role before copying. Hiring inboxes get a request for the right recruiting contact rather than a personal referral request. Editing a name or title does not silently rewrite saved message text.
+
+Review the contact's current employer, then copy a message or open an email draft in your own email client. Nothing is sent automatically. Record `contacted` only after sending it yourself, then track replies, referrals, declines, notes and follow-up dates. Counts are per job and do not affect the daily application target. Matching emails and profile URLs on other jobs trigger duplicate-contact warnings. A `do_not_contact` record suppresses copying/composing for matching records across jobs. These identity checks cannot recognize two different profiles or addresses belonging to one person.
+
+Data lives in PostgreSQL (`Referral`, `ReferralSearch`). Deleting a contact removes its local drafts and notes. Fetching uses public IPv4 addresses, pinned DNS resolution, HTTPS, limited same-website redirects, response-size/time limits and applicable robots rules. Blocked, IPv6-only, script-rendered or inaccessible sites may need a manual source import. Cross-domain redirects are not followed.
+
+Validation: `npm test`, `npm run test:integration`, and (with the dashboard running) `NODE_EXTRA_CA_CERTS="$HOME/.portless/ca.pem" npm run test:referrals:browser`. Browser fixtures are removed afterward; no external messages or applications are sent.

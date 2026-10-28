@@ -1,7 +1,68 @@
 {
+  "name": "job-search-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "portless jobdesk node scripts/dev.mjs",
+    "dev:web": "next dev --hostname 127.0.0.1",
+    "build": "prisma generate && next build",
+    "start": "next start --hostname 127.0.0.1",
+    "setup": "node scripts/setup.mjs",
+    "db:migrate": "prisma migrate deploy",
+    "import": "tsx scripts/import.ts",
+    "import:boards": "tsx scripts/import-boards.ts",
+    "mail:connect": "tsx scripts/mail-connect.ts",
+    "mail:sync": "tsx scripts/mail-sync.ts",
+    "mail:backfill": "tsx scripts/mail-backfill.ts",
+    "mail:reclassify": "tsx scripts/mail-reclassify.ts",
+    "interviews:from-mail": "tsx scripts/interviews-from-mail.ts",
+    "worker": "tsx scripts/worker.ts",
+    "sync": "tsx scripts/sync.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "test:integration": "tsx --test --test-concurrency=1 tests/integration/*.test.ts",
+    "reindex": "tsx scripts/reindex.ts",
+    "format": "prettier --write src scripts tests next.config.ts tsconfig.json",
+    "test:browser": "node tests/browser.mjs",
+    "sync:events": "tsx scripts/sync-events.ts",
+    "test:events:browser": "node tests/events-browser.mjs",
+    "dev:direct": "node scripts/dev.mjs",
+    "dev:url": "portless get jobdesk --no-worktree",
+    "test:referrals:browser": "node tests/referrals-browser.mjs",
+    "linkedin:resolve": "tsx scripts/linkedin-resolve.ts",
+    "linkedin:connect": "tsx scripts/linkedin-connect.ts"
+  },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "bullmq": "^6.3.11",
     "cheerio": "^1.2.0",
-    "puppeteer": "^24.38.0",
-    "puppeteer-core": "^24.38.0"
-  }
+    "dotenv": "^18.0.5",
+    "ioredis": "^6.0.0",
+    "lucide-react": "^1.52.0",
+    "next": "^16.3.8",
+    "puppeteer": "^25.12.0",
+    "puppeteer-core": "^25.12.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "portless": "^0.15.7",
+    "prettier": "^3.9.9",
+    "prisma": "^6.19.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.10.0+sha512.0b7f8b98060031904c017e3a41eb187a16d40eeb829b95c4f8cb03681761fc4ab53dd219115b9b447f4dce1a05a214764461e7d3703392a9f32f9511ce8c86c8"
 }

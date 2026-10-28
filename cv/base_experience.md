@@ -6,15 +6,15 @@ Every skill below has been used in production or in a shipped project. The "Wher
 | Skill | Where Used |
 |-------|-----------|
 | TypeScript | Genentech, Descasio, OurNigeria |
-| JavaScript (ESNext) | All roles |
+| JavaScript (ESNext) | SureTrade, Founders Lair, ActivEdge, Descasio, Genentech, OurNigeria |
 | NodeJS | SureTrade, Founders Lair, OurNigeria |
-| Python | Personal projects |
+| Python | Genentech (RAG pipeline and backend for the chat widget, with LangChain and LangGraph), personal projects |
 | PHP | Early career |
 
 ## Frontend Frameworks & Libraries
 | Skill | Where Used |
 |-------|-----------|
-| React | All roles from ActivEdge onward |
+| React | ActivEdge, Founders Lair, Descasio, Genentech, OurNigeria |
 | Next.js | Genentech (RAG chat widget), OurNigeria (web, dashboard, landing) |
 | Vue.js | Genentech (maintained legacy app before migration to React) |
 
@@ -36,6 +36,8 @@ Every skill below has been used in production or in a shipped project. The "Wher
 | REST APIs | SureTrade, Founders Lair, OurNigeria |
 | GraphQL | Genentech |
 | JWT Authentication | Genentech (frontend auth flows) |
+| Google One Tap | Wunderflats (simplified login and user retention) |
+| Stripe Connect | Wunderflats (payment functionality) |
 | SSO / Okta / SAML / OIDC | Genentech (enterprise SSO), Descasio (enterprise SSO) |
 | Role-Based Access Control (RBAC) | Genentech, OurNigeria |
 | WebSockets / SSE | OurNigeria (SSE streaming), ActivEdge (EventSource API), Personal project (WebSocket signaling for p2p chat app) |
@@ -63,7 +65,7 @@ Every skill below has been used in production or in a shipped project. The "Wher
 | Chroma | Genentech (RAG chat widget) |
 | Pinecone | Personal project |
 | Prompt Engineering | Genentech, OurNigeria |
-| Agentic Workflows | OurNigeria (multi-agent routing, intent classification, rerouting) |
+| Agentic Workflows | OurNigeria (multi-agent routing, intent classification, rerouting), Wunderflats (asynchronous Jira triage, microservice blast-radius analysis, log investigation, bug reproduction, proposed fixes, pull requests and ticket updates) |
 | Function Calling / Tool Use / Structured Outputs | Genentech (RAG widget), OurNigeria (multi-agent system), Personal projects |
 | Zod (LLM schemas, structured outputs) | Genentech (RAG widget), OurNigeria (multi-agent system), Personal projects |
 | ragas (RAG evaluation) | Genentech, OurNigeria |
@@ -106,7 +108,8 @@ Every skill below has been used in production or in a shipped project. The "Wher
 | Heroku | Founders Lair (API deployment) |
 | Docker / Docker Compose | OurNigeria (production deployment with health checks) |
 | GitHub Actions | Genentech (CI/CD), Descasio, OurNigeria |
-| CI/CD Pipelines | Founders Lair (Heroku/AWS), Genentech, OurNigeria |
+| CI/CD Pipelines | Founders Lair (Heroku/AWS), Genentech, OurNigeria, Wunderflats (pipeline restructuring and reducing unnecessary test runs; approximately 30% less wait time, candidate estimate) |
+| Google Cloud Run | Wunderflats (asynchronous AI agent for smaller production bug investigation and proposed fixes) |
 | pnpm | OurNigeria |
 | Infisical | OurNigeria (secrets management) |
 
@@ -114,6 +117,7 @@ Every skill below has been used in production or in a shipped project. The "Wher
 | Skill | Where Used |
 |-------|-----------|
 | Sentry | Multiple projects |
+| Google Cloud logs | Wunderflats (AI-assisted investigation of production issues and their origins across microservices) |
 | Datadog RUM | Multiple projects |
 | LogRocket | Multiple projects |
 | Lighthouse | Genentech, Descasio (performance auditing) |
@@ -128,6 +132,8 @@ Every skill below has been used in production or in a shipped project. The "Wher
 ## Code Quality & Tooling
 | Skill | Where Used |
 |-------|-----------|
+| Codebase maintenance and refactoring | Wunderflats |
+| Jira | Wunderflats (AI agent picks up, triages and updates bug tickets) |
 | ESLint | Descasio, OurNigeria |
 | Prettier | Descasio |
 | Husky | Descasio |
@@ -160,7 +166,7 @@ Every skill below has been used in production or in a shipped project. The "Wher
 | TDD / BDD | Descasio (Jest/Enzyme), Genentech (Playwright) |
 | Technical Architecture Reviews | Genentech, OurNigeria |
 | Mentorship & Code Reviews | Genentech (2 interns), Founders Lair (2 interns), Descasio |
-| Product Mindset | OurNigeria (full product ownership) |
+| Product Mindset | OurNigeria (full product ownership), Wunderflats (led customer-focused discussions about how engineering changes affect user experience) |
 
 ## Workflow Orchestration & Background Jobs
 | Skill | Where Used |
@@ -169,6 +175,7 @@ Every skill below has been used in production or in a shipped project. The "Wher
 | Temporal | OurNigeria (durable execution) |
 | Trigger.dev | OurNigeria (scheduled / event-driven jobs) |
 | Human-in-the-loop patterns | OurNigeria (LangGraph state machines with HITL checkpoints) |
+| Asynchronous AI workflows | Wunderflats (Google Cloud Run agent processes Jira tickets through investigation, reproduction, proposed fix, pull request and ticket update) |
 
 ## Security, Privacy & Compliance
 | Skill | Where Used |
