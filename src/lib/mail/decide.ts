@@ -130,6 +130,9 @@ function plan(input: Input): Decision {
     nextStepDueAt: carries ? classification.deadline : null,
   };
   if (match.kind === "none") {
+    // Recruiter cold outreach on LinkedIn is not an application.
+    if (mail.gmailId.startsWith("linkedin:"))
+      return review("LinkedIn messages do not create cards");
     const status = category === "confirmation" ? "submitted" : target;
     if (confidence !== "high" || !status)
       return review(

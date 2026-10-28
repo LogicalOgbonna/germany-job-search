@@ -898,3 +898,11 @@ test("decide does not change its inputs", () => {
   run(classification, unique, state);
   assert.equal(JSON.stringify([state, classification]), before);
 });
+
+test("a LinkedIn message never creates a card; it waits for review", () => {
+  const decision = run(verdict("interview"), none, null, {
+    gmailId: "linkedin:abc",
+  });
+  assert.equal(decision.action, "review");
+  assert.match(decision.reason, /LinkedIn/);
+});

@@ -1076,3 +1076,37 @@ test("a company name inside a longer word or phrase is not a match", () => {
   assert.equal(kind("", verdict({ company: "Super" })), "none");
   assert.equal(kind("Job Opportunity: Application at develop."), "unique");
 });
+
+test("a LinkedIn sender's known company corroborates the card", () => {
+  const result = matchMail(
+    mail({
+      gmailId: "linkedin:abc",
+      threadId: "linkedin:conv1",
+      fromAddress: "https://www.linkedin.com/in/someone",
+      fromName: "Some One",
+      senderCompany: "Peec AI",
+    }),
+    verdict({ category: "rejection" }),
+    [app()],
+  );
+  assert.deepEqual(result, {
+    kind: "unique",
+    applicationId: "a1",
+    reason: "company",
+    corroborated: true,
+  });
+});
+
+test("a LinkedIn sender with no known company names nothing", () => {
+  const result = matchMail(
+    mail({
+      gmailId: "linkedin:abc",
+      threadId: "linkedin:conv1",
+      fromAddress: "https://www.linkedin.com/in/someone",
+      fromName: "Some One",
+    }),
+    verdict({ category: "rejection" }),
+    [app()],
+  );
+  assert.equal(result.kind, "none");
+});

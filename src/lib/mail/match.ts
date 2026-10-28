@@ -354,6 +354,8 @@ function evidence(mail: RawMail, classification: Classification): Evidence[] {
     add(employer, "address");
     add(senderName(mail, [employer ?? "", own].filter(Boolean)), "display");
     add(own, "address");
+    // Counts like a display name: it corroborates only when it is exactly the card's company.
+    if (mail.senderCompany) add(mail.senderCompany, "display");
   }
   for (const name of subjectNames(mail.subject)) add(name, "subject");
   return found;

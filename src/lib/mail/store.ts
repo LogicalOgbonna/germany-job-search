@@ -63,6 +63,8 @@ const abortAfter = 5;
 // so only the forms that belong to hiring count.
 const keywords =
   /\b(?:applications?|applicants?|applying|applied|candidacy|your candidature|candidate|other candidates|interviews?|assessments?|coding challenge|take[- ]home|job offer|offer letter)\b|bewerbung|beworben|stellenangebot|vorstellungsgespr[aä]ch|kennenlerngespr[aä]ch|absage|zusage/i;
+// LinkedIn messages rarely have a subject, so their body is checked with the same words.
+export const mentionsHiring = (text: string) => keywords.test(text);
 // The categories that move a card along (classify.ts puts these to both readers).
 const stages = [
   "rejection",
@@ -252,6 +254,7 @@ const toMail = (row: Row): RawMail => ({
   receivedAt: row.receivedAt,
   bodyText: row.bodyText ?? "",
   fromMe: row.fromMe,
+  ...(row.senderCompany ? { senderCompany: row.senderCompany } : {}),
 });
 // `agreed` has no column either; `decidedBy` records how the two readers stood:
 // "<rule>+ai" agreed, "<rule> vs ai:<category>" split, "ai" Claude alone, "user" a person.
@@ -285,6 +288,7 @@ const mailFields = (mail: RawMail) => ({
   receivedAt: mail.receivedAt,
   bodyText: mail.bodyText,
   fromMe: mail.fromMe,
+  senderCompany: mail.senderCompany ?? null,
 });
 const verdictFields = (classification: Classification) => ({
   category: classification.category,

@@ -116,6 +116,7 @@ model MailMessage {
   subject       String
   receivedAt    DateTime
   bodyText      String
+  senderCompany String?
   fromMe        Boolean @default(false)
   category      String
   confidence    String
@@ -341,4 +342,28 @@ model PracticeSession {
   turns       Json     @default("[]")
   summary     Json?
   @@index([interviewId])
+}
+
+model LinkedinConnection {
+  id          String    @id @default(cuid())
+  profileUrl  String    @unique
+  name        String
+  company     String    @default("")
+  companyKey  String    @default("")
+  position    String    @default("")
+  email       String    @default("")
+  connectedOn DateTime?
+  updatedAt   DateTime  @updatedAt
+  @@index([companyKey])
+}
+
+model LinkedinSync {
+  id             String    @id
+  nextRunAt      DateTime  @default(now())
+  leaseUntil     DateTime?
+  lastCheckedAt  DateTime?
+  lastSuccessAt  DateTime?
+  lastSnapshotAt DateTime?
+  lastError      String?
+  lastCounts     Json?
 }
