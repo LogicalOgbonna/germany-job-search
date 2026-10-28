@@ -18,10 +18,12 @@ const hour = 3600_000;
 const day = 24 * hour;
 const firstWindow = 30 * day;
 // The changelog keeps 28 days, so the inbox snapshot is only needed once the last success is
-// older than this (or there has been none).
+// older than this, before it was ever read, or while a failed message is retried.
 const inboxAfter = 20 * day;
 const leaseMs = 10 * 60_000;
 const realId = "linkedin";
+const giveUpAfter = 5;
+const givenUpLimit = 200;
 
 export type LinkedinCounts = {
   connections: number | null; // null: the connections snapshot was not due or not ready
@@ -35,6 +37,44 @@ export type LinkedinCounts = {
 };
 export type LinkedinSkip =
   "mail-not-live" | "pending-proposals" | "not-connected" | "busy";
+
+// What LinkedinSync.lastCounts carries from check to check, next to the last check's counters.
+type Ledger = {
+  attempts: Record<string, number>; // failed checks per message id that is still retried
+  givenUp: string[]; // message ids that failed in five checks
+  retryFrom: string | null; // the oldest retried message: the changelog is read from there
+  inboxReadAt: string | null; // when the INBOX snapshot was last read
+};
+
+function ledgerOf(lastCounts: unknown): Ledger {
+  const stored = (lastCounts ?? {}) as Record<string, unknown>;
+  const attempts: Record<string, number> = {};
+  if (stored.attempts && typeof stored.attempts === "object")
+    for (const [id, tries] of Object.entries(stored.attempts))
+      if (typeof tries === "number") attempts[id] = tries;
+  const time = (value: unknown) =>
+    typeof value === "string" && !Number.isNaN(Date.parse(value))
+      ? value
+      : null;
+  return {
+    attempts,
+    givenUp: Array.isArray(stored.givenUp)
+      ? stored.givenUp.filter((id) => typeof id === "string")
+      : [],
+    retryFrom: time(stored.retryFrom),
+    inboxReadAt: time(stored.inboxReadAt),
+  };
+}
+
+const plural = (count: number) =>
+  `${count} LinkedIn message${count === 1 ? "" : "s"}`;
+
+class LeaseLost extends Error {
+  name = "LeaseLost";
+  constructor() {
+    super("Another LinkedIn check took over.");
+  }
+}
 
 const failure = (error: unknown) =>
   error instanceof Error ? error.message : "LinkedIn check failed";
@@ -114,9 +154,18 @@ export async function syncLinkedin(
   };
   // LinkedIn messages change cards through the same rules as mail, so every check, scheduled
   // or by hand, waits for the same switch and for a dry run's proposals (as syncMail does).
-  if (!(await mailLive())) return { ...counts, skipped: "mail-not-live" };
+  // The next run moves an hour ahead, so linkedinDue is not true at every tick meanwhile; the
+  // lease is not taken, and a row that does not exist yet is not created.
+  const later = async (skipped: LinkedinSkip) => {
+    await db.linkedinSync.updateMany({
+      where: { id },
+      data: { nextRunAt: new Date(now.valueOf() + hour) },
+    });
+    return { ...counts, skipped };
+  };
+  if (!(await mailLive())) return later("mail-not-live");
   if (await db.mailMessage.count({ where: { state: "proposed" } }))
-    return { ...counts, skipped: "pending-proposals" };
+    return later("pending-proposals");
   const token = options.client
     ? null
     : await readLinkedinToken(linkedinTokenPath("data"));
@@ -132,12 +181,12 @@ export async function syncLinkedin(
   });
   if (!lease.count) return { ...counts, skipped: "busy" };
   const held = keeper(id, claimed);
-  // Called between the long steps: snapshot pages, changelog paging, connection writes and
-  // each message can each take minutes on a first run.
+  // Called after every snapshot and changelog page (onPage), between connection writes and
+  // before each message: each can take minutes on a first run. Throws once the lease is lost.
   const stillHeld = async () => {
-    if (!(await held.renew()))
-      throw new Error("Another LinkedIn check took over.");
+    if (!(await held.renew())) throw new LeaseLost();
   };
+  const pages = { onPage: stillHeld };
   const sync = await db.linkedinSync.findUniqueOrThrow({ where: { id } });
   try {
     const client =
@@ -145,10 +194,24 @@ export async function syncLinkedin(
     const since = sync.lastSuccessAt
       ? new Date(sync.lastSuccessAt.valueOf() - hour)
       : new Date(now.valueOf() - firstWindow);
-    const snapshotDue =
+    const ledger = ledgerOf(sync.lastCounts);
+    // Failed messages are retried from either source, whatever their age.
+    const retrying = new Set(Object.keys(ledger.attempts));
+    const changesSince =
+      retrying.size && ledger.retryFrom
+        ? new Date(
+            Math.min(since.valueOf(), Date.parse(ledger.retryFrom) - hour),
+          )
+        : since;
+    // CONNECTIONS daily; lastSnapshotAt is when they were last read.
+    const connectionsDue =
       !sync.lastSnapshotAt ||
       now.valueOf() - sync.lastSnapshotAt.valueOf() > day;
+    // INBOX before it was ever read, when the last success is too old for the changelog, and
+    // while a failed message is retried (a message only the snapshot has is seen again).
     const inboxDue =
+      retrying.size > 0 ||
+      !ledger.inboxReadAt ||
       !sync.lastSuccessAt ||
       now.valueOf() - sync.lastSuccessAt.valueOf() > inboxAfter;
     const me = options.me ?? (await memberName());
@@ -159,25 +222,25 @@ export async function syncLinkedin(
       if (
         mail &&
         !isMe(mail.fromName) &&
-        withinWindow(mail, since) &&
+        (withinWindow(mail, since) || retrying.has(mail.gmailId)) &&
         !mails.has(mail.gmailId)
       )
         mails.set(mail.gmailId, mail);
     };
-    // The daily snapshot counts as taken once CONNECTIONS and (when due) INBOX were both
-    // read; otherwise it is asked for again at the next hourly check.
-    let snapshotTaken = false;
+    // Each snapshot counts as taken once it was read; one that is not ready yet is asked for
+    // again at the next hourly check.
+    let connectionsRead = false;
     let connectionsError: string | null = null;
-    if (snapshotDue) {
+    if (connectionsDue) {
       // A failed connections refresh is recorded but does not stop the message check.
       let people: Snapshot | null = null;
       try {
-        people = await client.snapshot("CONNECTIONS");
+        people = await client.snapshot("CONNECTIONS", pages);
       } catch (error) {
+        if (error instanceof LeaseLost) throw error;
         connectionsError = failure(error);
       }
       await stillHeld();
-      let peopleRead = false;
       if (people)
         try {
           // A snapshot cut short still adds and updates connections, but removes none.
@@ -185,24 +248,24 @@ export async function syncLinkedin(
             people.rows,
             people.complete,
           );
-          peopleRead = true;
+          connectionsRead = true;
         } catch (error) {
           connectionsError = failure(error);
         }
-      let inboxRead = !inboxDue;
-      if (inboxDue) {
-        await stillHeld();
-        const inbox = await client.snapshot("INBOX");
-        await stillHeld();
-        if (inbox) {
-          inboxRead = true;
-          for (const row of inbox.rows) keep(fromSnapshot(row));
-        }
+    }
+    let inboxRead = false;
+    if (inboxDue) {
+      await stillHeld();
+      const inbox = await client.snapshot("INBOX", pages);
+      await stillHeld();
+      if (inbox) {
+        inboxRead = true;
+        for (const row of inbox.rows) keep(fromSnapshot(row));
       }
-      snapshotTaken = peopleRead && inboxRead;
     }
     await stillHeld();
-    for (const event of await client.changes(since)) keep(fromChangelog(event));
+    for (const event of await client.changes(changesSince, pages))
+      keep(fromChangelog(event));
     await stillHeld();
     counts.read = mails.size;
 
@@ -230,9 +293,9 @@ export async function syncLinkedin(
     const ordered = [...mails.values()].sort(
       (x, y) => x.receivedAt.valueOf() - y.receivedAt.valueOf(),
     );
-    // The oldest message that could not be processed: the next check's window reaches back to
-    // it, and the messages stored meanwhile are skipped by their id.
-    let firstFailed: Date | null = null;
+    // Messages processed (stored, ignored or already stored) and those that threw.
+    const done = new Set<string>();
+    const failed = new Map<string, Date>();
     for (const mail of ordered) {
       await stillHeld();
       try {
@@ -245,6 +308,7 @@ export async function syncLinkedin(
           mentionsHiring(`${mail.subject}\n${mail.bodyText}`);
         if (!candidate) {
           counts.ignored++;
+          done.add(mail.gmailId);
           continue;
         }
         counts.candidates++;
@@ -260,19 +324,68 @@ export async function syncLinkedin(
         else counts.ignored++;
         if (decision.action === "update" || decision.action === "attach")
           linkedThreads.add(mail.threadId);
-      } catch {
+        done.add(mail.gmailId);
+      } catch (error) {
+        if (error instanceof LeaseLost) throw error;
         counts.failed++;
-        firstFailed ??= mail.receivedAt;
+        failed.set(mail.gmailId, mail.receivedAt);
       }
     }
-    await held.release({
-      lastSuccessAt: firstFailed ?? now,
-      lastError: connectionsError
-        ? `LinkedIn connections were not refreshed: ${connectionsError}`
+    // The ledger: a message that failed is retried by the next checks, which read the INBOX
+    // again, until it is processed or has failed in five checks. A retried message that an
+    // INBOX read did not bring back counts as a failed try too, so a message that is gone does
+    // not keep the inbox read every hour. Given-up messages are named until one is processed.
+    const givenUp = ledger.givenUp.filter((gmailId) => !done.has(gmailId));
+    const wasGivenUp = new Set(givenUp);
+    const attempts: Record<string, number> = {};
+    const tried = new Set(failed.keys());
+    for (const gmailId of retrying)
+      if (!done.has(gmailId) && !tried.has(gmailId)) {
+        if (inboxRead) tried.add(gmailId);
+        else attempts[gmailId] = ledger.attempts[gmailId];
+      }
+    for (const gmailId of tried) {
+      if (wasGivenUp.has(gmailId)) continue;
+      const tries = (ledger.attempts[gmailId] ?? 0) + 1;
+      if (tries >= giveUpAfter) givenUp.push(gmailId);
+      else attempts[gmailId] = tries;
+    }
+    const kept = givenUp.slice(-givenUpLimit);
+    // retryFrom: the oldest retried message, from this check's failures and, while messages
+    // this check did not see are still retried, from the ledger.
+    const carried = Object.keys(attempts).some(
+      (gmailId) => !failed.has(gmailId),
+    );
+    const oldest = [
+      ...[...failed]
+        .filter(([gmailId]) => gmailId in attempts)
+        .map(([, at]) => at.valueOf()),
+      ...(carried && ledger.retryFrom ? [Date.parse(ledger.retryFrom)] : []),
+    ];
+    const lastError =
+      [
+        connectionsError &&
+          `LinkedIn connections were not refreshed: ${connectionsError}`,
+        kept.length &&
+          `${plural(kept.length)} could not be processed after ${giveUpAfter} attempts`,
+      ]
+        .filter(Boolean)
+        .join("; ") || null;
+    const bookkeeping: Ledger = {
+      attempts,
+      givenUp: kept,
+      retryFrom: oldest.length
+        ? new Date(Math.min(...oldest)).toISOString()
         : null,
-      lastCounts: counts,
+      inboxReadAt: inboxRead ? now.toISOString() : ledger.inboxReadAt,
+    };
+    // The check succeeded although messages failed: they are on the ledger instead.
+    await held.release({
+      lastSuccessAt: now,
+      lastError,
+      lastCounts: { ...counts, ...bookkeeping },
       nextRunAt: new Date(now.valueOf() + hour),
-      ...(snapshotTaken ? { lastSnapshotAt: now } : {}),
+      ...(connectionsRead ? { lastSnapshotAt: now } : {}),
     });
     return { ...counts, skipped: null };
   } catch (error) {
@@ -296,17 +409,39 @@ export async function linkedinOverview() {
     lastCheckedAt: sync?.lastCheckedAt ?? null,
     lastSuccessAt: sync?.lastSuccessAt ?? null,
     lastError: sync?.lastError ?? null,
-    lastCounts: (sync?.lastCounts as LinkedinCounts | null) ?? null,
+    lastCounts: countsOf(sync?.lastCounts),
     connections: await db.linkedinConnection.count(),
   };
 }
 
-// For the worker's tick: connected, the next run has come, and no check holds the lease.
-export async function linkedinDue(now = new Date()): Promise<boolean> {
-  if (!(await readLinkedinToken(linkedinTokenPath("data")))) return false;
-  const sync = await db.linkedinSync.findUnique({ where: { id: realId } });
+// The last check's counters, without the ledger kept next to them.
+function countsOf(lastCounts: unknown): LinkedinCounts | null {
+  if (!lastCounts || typeof lastCounts !== "object") return null;
+  const {
+    attempts: _attempts,
+    givenUp: _givenUp,
+    retryFrom: _retryFrom,
+    inboxReadAt: _inboxReadAt,
+    ...counts
+  } = lastCounts as LinkedinCounts & Partial<Ledger>;
+  return counts;
+}
+
+// For the worker's tick: connected, the next run has come, no check holds the lease, and no
+// mail dry run's proposals wait (as the mail trigger). syncLinkedin checks the same itself.
+export async function linkedinDue(
+  now = new Date(),
+  options: { syncId?: string; connected?: boolean } = {}, // tests use their own row
+): Promise<boolean> {
+  const connected =
+    options.connected ?? !!(await readLinkedinToken(linkedinTokenPath("data")));
+  if (!connected) return false;
+  const sync = await db.linkedinSync.findUnique({
+    where: { id: options.syncId ?? realId },
+  });
   return (
-    !sync ||
-    (sync.nextRunAt <= now && (!sync.leaseUntil || sync.leaseUntil < now))
+    (!sync ||
+      (sync.nextRunAt <= now && (!sync.leaseUntil || sync.leaseUntil < now))) &&
+    !(await db.mailMessage.count({ where: { state: "proposed" } }))
   );
 }

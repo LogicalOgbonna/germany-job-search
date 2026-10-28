@@ -16,9 +16,11 @@ export async function saveContact(
   const identity = hash(
     email || linkedin || `${contact.name.toLowerCase()}:${contact.sourceUrl}`,
   );
-  // A contact saved before LinkedIn URLs were lower-cased has its identity from the casing
-  // it was entered with: it is the same person, so it is returned untouched, as upsert does.
-  if (!email && linkedin) {
+  // A LinkedIn profile names one person, so it is looked up first, whatever its casing and
+  // whether or not an email came with it: a contact saved before LinkedIn URLs were
+  // lower-cased has its identity from the casing it was entered with, or from an email added
+  // later. It is the same person, so it is returned untouched, as upsert does.
+  if (linkedin) {
     const earlier = await db.referral.findFirst({
       where: { jobId, linkedin: { equals: linkedin, mode: "insensitive" } },
     });

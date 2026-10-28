@@ -15,6 +15,7 @@ import {
   listenOnCallback,
   type LinkedinApp,
 } from "../src/lib/linkedin/callback";
+import { checkDataAccess, keptAfterDataCheck } from "../src/lib/linkedin/data";
 
 // npm run linkedin:connect            JobDesk app (posting, sign-in)
 // npm run linkedin:connect -- --data  JobDesk Data app (read-only data portability)
@@ -28,48 +29,6 @@ if (!clientId || !clientSecret) {
     `Set ${prefix}_CLIENT_ID and ${prefix}_CLIENT_SECRET in .env (the ${label} app's Auth tab), then try again.`,
   );
   process.exit(1);
-}
-
-// Data portability is versioned and accepts only this version.
-const dmaHeaders = (token: LinkedinToken) => ({
-  Authorization: `Bearer ${token.accessToken}`,
-  "LinkedIn-Version": "202312",
-  "Content-Type": "application/json",
-});
-
-// The changelog archive normally starts by itself after consent; LinkedIn documents an empty
-// POST to start it when it has not. Then one snapshot read proves the token works. A 404 there
-// means LinkedIn is still collecting the history, which takes a while after a first consent.
-async function checkData(token: LinkedinToken): Promise<string> {
-  const api = "https://api.linkedin.com/rest";
-  const opts = { signal: AbortSignal.timeout(30000) };
-  const archive = await fetch(
-    `${api}/memberAuthorizations?q=memberAndApplication`,
-    { headers: dmaHeaders(token), ...opts },
-  );
-  let feed = archive.ok ? "already on" : "";
-  if (!archive.ok) {
-    const started = await fetch(`${api}/memberAuthorizations`, {
-      method: "POST",
-      headers: dmaHeaders(token),
-      body: "{}",
-      ...opts,
-    });
-    feed = started.ok
-      ? "switched on now"
-      : `could not be switched on (${started.status})`;
-  }
-  const snapshot = await fetch(
-    `${api}/memberSnapshotData?q=criteria&domain=PROFILE`,
-    { headers: dmaHeaders(token), ...opts },
-  );
-  const profile = snapshot.ok
-    ? "profile snapshot readable"
-    : snapshot.status === 404
-      ? "profile snapshot not ready yet (LinkedIn is still collecting your history; try again later)"
-      : `profile snapshot refused (${snapshot.status}): ${(await snapshot.text()).slice(0, 200)}`;
-  if (!snapshot.ok && snapshot.status !== 404) throw new Error(profile);
-  return `Activity feed ${feed}; ${profile}.`;
 }
 
 // One read-only call that proves the token works for what this app is for.
@@ -133,7 +92,9 @@ server.on("request", async (request, response) => {
     return;
   }
   answered = true;
-  // Set once the data token is on disk, so a failed data check can take it back.
+  // LinkedIn has answered; the data check's retries may take a few minutes of their own.
+  clearTimeout(timer);
+  // Set once the data token is on disk, so a data check that LinkedIn refuses takes it back.
   let unchecked: string | null = null;
   try {
     if (params.get("state") !== state)
@@ -151,11 +112,21 @@ server.on("request", async (request, response) => {
         clientSecret,
       }),
     );
-    // Saved before the data check; a check that fails removes it again below, so the worker
-    // never syncs with a token that was reported as not connected.
+    // Saved before the data check. A check that LinkedIn refuses (401/403) removes it again
+    // below, so the worker never syncs with a token that was reported as not connected. A
+    // timeout, 5xx or network failure keeps it: the hourly check tries again.
     await writeLinkedinToken(linkedinTokenPath(app), token);
-    if (app === "data") unchecked = linkedinTokenPath(app);
-    const status = app === "data" ? await checkData(token) : "";
+    let status = "";
+    if (app === "data") {
+      unchecked = linkedinTokenPath(app);
+      try {
+        status = await checkDataAccess(token.accessToken);
+      } catch (error) {
+        const kept = keptAfterDataCheck(error);
+        if (kept === null) throw error;
+        status = kept;
+      }
+    }
     unchecked = null;
     await reply(
       response,

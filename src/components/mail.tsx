@@ -24,6 +24,8 @@ type ReviewItem = {
   role: string | null;
   reason: string;
   threadId: string;
+  // False for a LinkedIn message, which never starts a card. Older servers leave it out.
+  canStartCard?: boolean;
   // An interview the email offers, read when it was fetched. Dates are ISO strings.
   interview?: OfferedInterview | null;
   candidates: {
@@ -386,13 +388,15 @@ function ReviewRow({
   item: ReviewItem;
   notify: (message: string) => void;
 }) {
-  // A LinkedIn message is not proof of an application, so it never starts a card.
-  const fromLinkedin = item.threadId.startsWith("linkedin:");
+  // A LinkedIn message is not proof of an application, so it never starts a card. The server
+  // says so; the thread's prefix stands in when the field is missing.
+  const canStart =
+    item.canStartCard ?? !item.threadId.startsWith(linkedinPrefix);
   const [category, setCategory] = useState(item.category),
     [chosen, setChosen] = useState(
       item.candidates.length === 1
         ? item.candidates[0].applicationId
-        : item.candidates.length || fromLinkedin
+        : item.candidates.length || !canStart
           ? ""
           : "new",
     ),
@@ -402,7 +406,7 @@ function ReviewRow({
   const filed = passive(category);
   // The candidates are matched again on every load, so a remembered choice can disappear.
   const target =
-    (fromLinkedin ? ["none"] : ["new", "none"]).includes(chosen) ||
+    (canStart ? ["new", "none"] : ["none"]).includes(chosen) ||
     item.candidates.some((card) => card.applicationId === chosen)
       ? chosen
       : "";
@@ -587,9 +591,7 @@ function ReviewRow({
                 {card.status.replaceAll("_", " ")})
               </option>
             ))}
-            {!fromLinkedin && (
-              <option value="new">New card from this email</option>
-            )}
+            {canStart && <option value="new">New card from this email</option>}
             <option value="none">No application</option>
           </select>
           <button

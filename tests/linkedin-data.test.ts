@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  checkDataAccess,
+  keptAfterDataCheck,
   LinkedinAuthError,
   linkedinDataClient,
 } from "../src/lib/linkedin/data";
@@ -270,5 +272,123 @@ test("changes never asks for more than the last 28 days", async () => {
   assert.equal(
     calls[0].url.searchParams.get("startTime"),
     String(now.valueOf() - 28 * 86_400_000),
+  );
+});
+
+test("changes fails when a full page is followed by one with nothing new", async () => {
+  // A changelog that ignores startTime and start: the same full page every time.
+  const full = Array.from({ length: 10 }, (_, i) => ({
+    id: i + 1,
+    processedAt: 500,
+  }));
+  const stuck = fake(() => json({ elements: full }));
+  await assert.rejects(
+    linkedinDataClient({
+      token: "t",
+      fetch: stuck.fetcher,
+      sleep,
+      now: () => new Date(1000),
+    }).changes(new Date(100)),
+    { message: "LinkedIn changelog paging did not advance" },
+  );
+  assert.equal(stuck.calls.length, 2);
+});
+
+test("snapshot and changes call onPage after every page, and stop when it throws", async () => {
+  const pages = fake((call) =>
+    call.url.searchParams.get("start") === "0"
+      ? json(page([{ a: 1 }], true))
+      : json(page([{ a: 2 }], false)),
+  );
+  const client = linkedinDataClient({
+    token: "t",
+    fetch: pages.fetcher,
+    sleep,
+  });
+  let turns = 0;
+  const onPage = async () => {
+    turns++;
+  };
+  await client.snapshot("INBOX", { onPage });
+  assert.equal(turns, 2);
+
+  const all = [
+    { id: 1, processedAt: 100 },
+    { id: 2, processedAt: 200 },
+  ];
+  const log = changelog(all);
+  turns = 0;
+  await linkedinDataClient({
+    token: "t",
+    fetch: log.fetcher,
+    sleep,
+    now: () => new Date(1000),
+  }).changes(new Date(100), { onPage });
+  assert.equal(turns, log.calls.length);
+
+  const lost = fake(() => json(page([{ a: 1 }], true)));
+  await assert.rejects(
+    linkedinDataClient({ token: "t", fetch: lost.fetcher, sleep }).snapshot(
+      "CONNECTIONS",
+      {
+        onPage: async () => {
+          throw new Error("Another LinkedIn check took over.");
+        },
+      },
+    ),
+    /took over/,
+  );
+  assert.equal(lost.calls.length, 1, "no page is read after the lease is lost");
+});
+
+test("checkDataAccess retries the profile snapshot and reports what it found", async () => {
+  const flaky = fake((call, index) => {
+    if (call.url.pathname === "/rest/memberAuthorizations")
+      return json({ elements: [] });
+    return index === 1 ? json({}, 503) : json(page([], false));
+  });
+  const report = await checkDataAccess("t", { fetch: flaky.fetcher, sleep });
+  assert.match(report, /Activity feed already on; profile snapshot readable/);
+  const snapshots = flaky.calls.filter(
+    (c) => c.url.pathname === "/rest/memberSnapshotData",
+  );
+  assert.equal(snapshots.length, 2, "the 503 was retried");
+  assert.equal(snapshots[0].url.searchParams.get("domain"), "PROFILE");
+
+  const notYet = fake((call) =>
+    call.url.pathname === "/rest/memberAuthorizations"
+      ? json({ elements: [] })
+      : json({}, 404),
+  );
+  assert.match(
+    await checkDataAccess("t", { fetch: notYet.fetcher, sleep }),
+    /not ready yet/,
+  );
+
+  const denied = fake((call) =>
+    call.url.pathname === "/rest/memberAuthorizations"
+      ? json({}, 401)
+      : json({}, 401),
+  );
+  await assert.rejects(
+    checkDataAccess("t", { fetch: denied.fetcher, sleep }),
+    LinkedinAuthError,
+  );
+});
+
+test("a failed data check keeps the token unless LinkedIn refused it", () => {
+  assert.equal(
+    keptAfterDataCheck(new LinkedinAuthError("Reconnect LinkedIn")),
+    null,
+  );
+  assert.equal(
+    keptAfterDataCheck(new Error("LinkedIn answered 503")),
+    "Connected, but LinkedIn's data check failed: LinkedIn answered 503. Jobdesk will retry on the next hourly check.",
+  );
+  assert.equal(
+    keptAfterDataCheck(
+      new DOMException("The operation timed out.", "TimeoutError"),
+    ),
+    "Connected, but LinkedIn's data check failed: The operation timed out. Jobdesk will retry on the next hourly check.",
   );
 });

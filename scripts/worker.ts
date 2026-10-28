@@ -86,7 +86,9 @@ const worker = new Worker(
           );
       }
       // LinkedIn messages change cards through the same rules, so they wait for the same
-      // switch. linkedinDue needs the data token; syncLinkedin sets the next run an hour ahead.
+      // switch and, as the mail trigger above, for any proposals still waiting to be applied
+      // (linkedinDue counts them, and needs the data token). syncLinkedin sets the next run an
+      // hour ahead, also when it skips.
       if ((await mailLive()) && (await linkedinDue()))
         await queue.add(
           "linkedin-sync",

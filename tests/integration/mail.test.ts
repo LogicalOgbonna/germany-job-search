@@ -817,6 +817,8 @@ test("mail pipeline against the local database, synthetic rows only", async () =
           (item) => item.id === row.id,
         );
         assert.ok(review);
+        // An email may start a card from review; a LinkedIn message may not.
+        assert.equal(review.canStartCard, true);
         assert.deepEqual(review.candidates, [
           {
             applicationId: appA.id,

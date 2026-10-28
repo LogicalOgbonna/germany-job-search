@@ -257,6 +257,20 @@ test("a LinkedIn profile saved by hand in other casing and then added as a conne
     });
     assert.equal(await db.referral.count({ where: { jobId: job.id } }), 1);
 
+    // Found by the LinkedIn URL first, also when the contact now carries an email too.
+    const withEmail = await saveContact(job.id, {
+      name: "Grace Testwell",
+      title: "Staff Engineer",
+      email: `grace-${key.slice(0, 8)}@example.com`,
+      linkedin: profileUrl,
+      sourceUrl: "https://example.com/team",
+      sourceKind: "Test fixture",
+      sourceNote: "Synthetic, never contact",
+      emailStatus: "Not verified",
+    });
+    assert.equal(withEmail.id, saved[0].id);
+    assert.equal(await db.referral.count({ where: { jobId: job.id } }), 1);
+
     // The same person saved for another job shows as contacted elsewhere, whatever the casing.
     assert.equal((await call(other.id, manual)).status, 201);
     const listed = (await (await call(job.id)).json()) as {

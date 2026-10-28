@@ -2378,6 +2378,8 @@ export async function mailOverview(): Promise<{
     role: string | null;
     reason: string;
     threadId: string;
+    // False when a reviewer may not start a new card from it (startsNoCard: LinkedIn).
+    canStartCard: boolean;
     candidates: Array<{
       applicationId: string;
       company: string;
@@ -2491,6 +2493,7 @@ export async function mailOverview(): Promise<{
         role: row.role,
         reason: row.matchReason,
         threadId: row.threadId,
+        canStartCard: !startsNoCard(toMail(row)),
         interview: offer(row),
         candidates: ids.flatMap((id) => {
           const card = byId.get(id);

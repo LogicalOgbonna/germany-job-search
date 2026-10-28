@@ -2,11 +2,17 @@ import "dotenv/config";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import { Prisma } from "@prisma/client";
 import { db } from "../../src/lib/db";
 import { classify } from "../../src/lib/mail/classify";
 import { matchMail, normalizeCompany } from "../../src/lib/mail/match";
 import { classifyByRules } from "../../src/lib/mail/rules";
-import { mailLive, resolveReview, setMailLive } from "../../src/lib/mail/store";
+import {
+  mailLive,
+  mailOverview,
+  resolveReview,
+  setMailLive,
+} from "../../src/lib/mail/store";
 import type {
   AiClassifier,
   BoardApplication,
@@ -22,7 +28,7 @@ import type {
   SnapshotDomain,
 } from "../../src/lib/linkedin/data";
 import { fromSnapshot } from "../../src/lib/linkedin/messages";
-import { syncLinkedin } from "../../src/lib/linkedin/sync";
+import { linkedinDue, syncLinkedin } from "../../src/lib/linkedin/sync";
 
 // Runs against the local Jobdesk database. Every row it writes carries the random tag below:
 // synthetic companies, conversation ids and profile URLs. LinkedIn is a fake client in this
@@ -205,7 +211,17 @@ const state = () =>
 const setState = (data: {
   lastSuccessAt?: Date | null;
   lastSnapshotAt?: Date | null;
+  lastCounts?: typeof Prisma.DbNull;
+  nextRunAt?: Date;
+  leaseUntil?: Date | null;
 }) => db.linkedinSync.update({ where: { id: syncId }, data });
+// The bookkeeping kept in lastCounts next to the last check's counters.
+const ledger = async () =>
+  (await state()).lastCounts as {
+    attempts: Record<string, number>;
+    givenUp: string[];
+    inboxReadAt: string | null;
+  };
 // Claude agrees with the rules, with high confidence.
 const reading = (values: Partial<Classification>): Classification => ({
   category: "unrelated",
@@ -431,7 +447,11 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
           fromStranger.matchReason,
           /^The LinkedIn sender's company is unknown or does not match\./,
         );
-        // A reviewer cannot start a card from a LinkedIn message.
+        // A reviewer cannot start a card from a LinkedIn message, and the review list says so.
+        const listed = (await mailOverview()).review.find(
+          (item) => item.id === fromStranger.id,
+        );
+        assert.equal(listed?.canStartCard, false);
         await assert.rejects(
           resolveReview(fromStranger.id, {
             category: "rejection",
@@ -461,8 +481,9 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
         assert.equal(after.leaseUntil, null);
         assert.equal(after.lastError, null);
         assert.equal(after.lastSuccessAt?.valueOf(), now.valueOf());
-        // Both CONNECTIONS and INBOX were read.
+        // Both CONNECTIONS and INBOX were read, and each read is recorded on its own.
         assert.equal(after.lastSnapshotAt?.valueOf(), now.valueOf());
+        assert.equal((await ledger()).inboxReadAt, now.toISOString());
         assert.equal(after.nextRunAt.valueOf(), now.valueOf() + 3600_000);
       },
     );
@@ -485,7 +506,7 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
     });
 
     await step(
-      "connections are read daily; the inbox only when the last success is over 20 days old",
+      "connections are read daily; the inbox on a first run or when the last success is over 20 days old",
       async () => {
         // A day-old snapshot and a recent success: the changelog covers the window.
         await setState({
@@ -511,7 +532,9 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
         assert.equal(after.lastSnapshotAt?.valueOf(), daysAgo(2).valueOf());
         assert.equal(after.lastSuccessAt?.valueOf(), now.valueOf());
 
-        // Last success 21 days ago: the inbox is read too. Not ready: asked again next hour.
+        // Last success 21 days ago: the inbox is read too. CONNECTIONS is recorded as read
+        // although INBOX was not ready.
+        const inboxBefore = (await ledger()).inboxReadAt;
         await setState({
           lastSnapshotAt: daysAgo(2),
           lastSuccessAt: daysAgo(21),
@@ -525,7 +548,30 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
         ]);
         assert.equal(result.connections, 1);
         after = await state();
-        assert.equal(after.lastSnapshotAt?.valueOf(), daysAgo(2).valueOf());
+        assert.equal(after.lastSnapshotAt?.valueOf(), now.valueOf());
+        assert.equal((await ledger()).inboxReadAt, inboxBefore);
+
+        // The inbox is read when it is due, also when the connections are not.
+        await setState({ lastSnapshotAt: now, lastSuccessAt: daysAgo(21) });
+        asked.length = 0;
+        await run(fake(inbox, [knownEvent]));
+        assert.deepEqual(asked, ["snapshot:INBOX", "changes"]);
+
+        // A first run whose INBOX is not ready asks for it again every hour until it is read.
+        await setState({
+          lastSnapshotAt: now,
+          lastSuccessAt: daysAgo(0.01),
+          lastCounts: Prisma.DbNull,
+        });
+        for (const ready of [false, false, true]) {
+          asked.length = 0;
+          await run(fake(inbox, [knownEvent], ready ? {} : { inbox: null }));
+          assert.deepEqual(asked, ["snapshot:INBOX", "changes"]);
+        }
+        assert.equal((await ledger()).inboxReadAt, now.toISOString());
+        asked.length = 0;
+        await run(fake(inbox, [knownEvent]));
+        assert.deepEqual(asked, ["changes"]);
       },
     );
 
@@ -566,14 +612,102 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
         const first = await run(fake(inbox, [broken]));
         assert.equal(first.failed, 1);
         assert.equal(await db.mailMessage.count({ where: thread("retry") }), 0);
-        // The window of the next check starts an hour before the failed message.
-        assert.equal((await state()).lastSuccessAt?.valueOf(), at.valueOf());
+        // The check itself succeeded; the failed message is on the ledger instead.
+        assert.equal((await state()).lastSuccessAt?.valueOf(), now.valueOf());
+        assert.deepEqual(Object.values((await ledger()).attempts), [1]);
 
+        asked.length = 0;
         const second = await run(fake(inbox, [fromKnown("retry", at, text)]));
+        // The INBOX is read again, so a message only the snapshot has is seen again too.
+        assert.deepEqual(asked, ["snapshot:INBOX", "changes"]);
         assert.equal(second.failed, 0);
         assert.equal(second.candidates, 1);
         assert.equal(await db.mailMessage.count({ where: thread("retry") }), 1);
-        assert.equal((await state()).lastSuccessAt?.valueOf(), now.valueOf());
+        assert.deepEqual((await ledger()).attempts, {});
+        assert.equal((await state()).lastError, null);
+
+        asked.length = 0;
+        await run(fake(inbox, [fromKnown("retry", at, text)]));
+        assert.deepEqual(asked, ["changes"], "nothing left to retry");
+      },
+    );
+
+    await step(
+      "a message only the inbox snapshot has is retried from it, outside the window",
+      async () => {
+        const old = daysAgo(3);
+        const message = (from: string) =>
+          row({
+            name: "snapshot-only",
+            from,
+            url: profile(1),
+            content: turnedDown(a),
+            at: old,
+          });
+        // An inbox read (last success 21 days ago) brings the message; it fails.
+        await setState({ lastSnapshotAt: now, lastSuccessAt: daysAgo(21) });
+        const first = await run(
+          fake([message(`Litest${tag}\u0000 Sender`)], []),
+        );
+        assert.equal(first.failed, 1);
+        // Three days old, far outside the next window, and not in the changelog.
+        const second = await run(fake([message(`Litest${tag} Sender`)], []));
+        assert.equal(second.failed, 0);
+        assert.equal(
+          await db.mailMessage.count({ where: thread("snapshot-only") }),
+          1,
+        );
+        assert.deepEqual((await ledger()).attempts, {});
+      },
+    );
+
+    await step(
+      "a message that fails in five checks is given up on and named",
+      async () => {
+        const at = daysAgo(2);
+        const message = (from: string) =>
+          row({
+            name: "given-up",
+            from,
+            url: profile(1),
+            content: turnedDown(a),
+            at,
+          });
+        const broken = fake([message(`Litest${tag}\u0000 Sender`)], []);
+        await setState({ lastSnapshotAt: now, lastSuccessAt: daysAgo(21) });
+        for (let attempt = 1; attempt <= 5; attempt++) {
+          asked.length = 0;
+          assert.equal((await run(broken)).failed, 1);
+          assert.deepEqual(asked, ["snapshot:INBOX", "changes"]);
+          const after = await state();
+          assert.equal(after.lastSuccessAt?.valueOf(), now.valueOf());
+          assert.equal(
+            after.lastError,
+            attempt < 5
+              ? null
+              : "1 LinkedIn message could not be processed after 5 attempts",
+          );
+        }
+        assert.deepEqual((await ledger()).attempts, {});
+        assert.equal((await ledger()).givenUp.length, 1);
+        // No longer a reason to read the inbox, but still named.
+        asked.length = 0;
+        await run(broken);
+        assert.deepEqual(asked, ["changes"]);
+        assert.equal(
+          (await state()).lastError,
+          "1 LinkedIn message could not be processed after 5 attempts",
+        );
+        // Once it is processed after all, it is no longer named.
+        await setState({ lastSuccessAt: daysAgo(21) });
+        const fixed = await run(fake([message(`Litest${tag} Sender`)], []));
+        assert.equal(fixed.failed, 0);
+        assert.equal(
+          await db.mailMessage.count({ where: thread("given-up") }),
+          1,
+        );
+        assert.deepEqual((await ledger()).givenUp, []);
+        assert.equal((await state()).lastError, null);
       },
     );
 
@@ -604,6 +738,90 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
       }
       assert.equal((await state()).leaseUntil, null);
     });
+
+    await step(
+      "every snapshot page renews the lease, and a lost lease stops the paging",
+      async () => {
+        await setState({
+          lastSnapshotAt: daysAgo(2),
+          lastSuccessAt: daysAgo(1),
+        });
+        const realNow = Date.now;
+        const read: string[] = [];
+        const taken = new Date(realNow() + 3600_000);
+        // A two-page CONNECTIONS snapshot; another check takes the lease after page one.
+        const paged: LinkedinDataClient = {
+          snapshot: async (domain, options) => {
+            read.push(`${domain}:1`);
+            Date.now = () => realNow() + 2 * 60_000;
+            await db.linkedinSync.update({
+              where: { id: syncId },
+              data: { leaseUntil: taken },
+            });
+            await options?.onPage?.();
+            read.push(`${domain}:2`);
+            return { rows: colleagues, complete: false };
+          },
+          changes: async () => {
+            read.push("changes");
+            return [];
+          },
+        };
+        try {
+          await assert.rejects(run(paged), /Another LinkedIn check took over/);
+        } finally {
+          Date.now = realNow;
+        }
+        assert.deepEqual(read, ["CONNECTIONS:1"]);
+        // The other check's lease is left alone.
+        assert.equal((await state()).leaseUntil?.valueOf(), taken.valueOf());
+        await setState({ leaseUntil: null });
+      },
+    );
+
+    await step(
+      "a skipped check moves the next run an hour ahead without taking the lease",
+      async () => {
+        const due = () => linkedinDue(now, { syncId, connected: true });
+        await setState({ nextRunAt: daysAgo(1), leaseUntil: null });
+        assert.equal(await due(), true);
+        const waiting = await db.mailMessage.create({
+          data: {
+            gmailId: `linkedin:test-li-${tag}-proposed-2`,
+            threadId: `linkedin:${conversation("proposed-2")}`,
+            fromAddress: "",
+            subject: "Synthetic proposal",
+            receivedAt: daysAgo(1),
+            bodyText: "Synthetic, never applied.",
+            category: "unrelated",
+            confidence: "high",
+            decidedBy: "test",
+            state: "proposed",
+          },
+        });
+        try {
+          // The worker does not queue a check while proposals wait.
+          assert.equal(await due(), false);
+          assert.equal((await run(fake(inbox))).skipped, "pending-proposals");
+          const after = await state();
+          assert.equal(after.nextRunAt.valueOf(), now.valueOf() + 3600_000);
+          assert.equal(after.leaseUntil, null);
+        } finally {
+          await db.mailMessage.delete({ where: { id: waiting.id } });
+        }
+        await setState({ nextRunAt: daysAgo(1) });
+        await setMailLive(false);
+        try {
+          assert.equal((await run(fake(inbox))).skipped, "mail-not-live");
+        } finally {
+          await setMailLive(true);
+        }
+        const after = await state();
+        assert.equal(after.nextRunAt.valueOf(), now.valueOf() + 3600_000);
+        assert.equal(after.leaseUntil, null);
+        assert.equal(await due(), false);
+      },
+    );
 
     await step(
       "a failed LinkedIn read is recorded and frees the lease",
