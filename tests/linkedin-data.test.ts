@@ -109,7 +109,67 @@ test("changes pages by processedAt and stops on an empty page", async () => {
     [1, 2],
   );
   assert.equal(calls[0].url.searchParams.get("startTime"), "100");
-  assert.equal(calls[1].url.searchParams.get("startTime"), "201");
+  // Inclusive: events that share the last page's final millisecond are asked for again.
+  assert.equal(calls[1].url.searchParams.get("startTime"), "200");
+});
+
+// LinkedIn's events ordered as the changelog serves them; `start` skips within the page.
+const changelog = (all: { id: number; processedAt: number }[]) =>
+  fake((call) => {
+    const from = Number(call.url.searchParams.get("startTime"));
+    const skip = Number(call.url.searchParams.get("start") ?? 0);
+    const count = Number(call.url.searchParams.get("count"));
+    return json({
+      elements: all
+        .filter((event) => event.processedAt >= from)
+        .slice(skip, skip + count),
+    });
+  });
+
+test("changes keeps every event when more than a page share one processedAt", async () => {
+  const all = [
+    { id: 1, processedAt: 100 },
+    ...Array.from({ length: 12 }, (_, i) => ({ id: 2 + i, processedAt: 200 })),
+    { id: 14, processedAt: 300 },
+  ];
+  const { calls, fetcher } = changelog(all);
+  const events = await linkedinDataClient({
+    token: "t",
+    fetch: fetcher,
+    sleep,
+    now: () => new Date(1000),
+  }).changes(new Date(100));
+  assert.deepEqual(
+    events.map((e: any) => e.id),
+    all.map((e) => e.id),
+  );
+  // The boundary millisecond is asked for again, past the events already read there.
+  assert.equal(calls[1].url.searchParams.get("startTime"), "200");
+  assert.equal(calls[1].url.searchParams.get("start"), "9");
+});
+
+test("changes reads no event twice when the boundary is asked for again", async () => {
+  const all = [
+    { id: 1, processedAt: 100 },
+    { id: 2, processedAt: 200 },
+    { id: 3, processedAt: 200 },
+  ];
+  // A changelog that ignores `start`: every page repeats the boundary events.
+  const { calls, fetcher } = fake((call) => {
+    const from = Number(call.url.searchParams.get("startTime"));
+    return json({ elements: all.filter((event) => event.processedAt >= from) });
+  });
+  const events = await linkedinDataClient({
+    token: "t",
+    fetch: fetcher,
+    sleep,
+    now: () => new Date(1000),
+  }).changes(new Date(100));
+  assert.deepEqual(
+    events.map((e: any) => e.id),
+    [1, 2, 3],
+  );
+  assert.equal(calls.length, 2, "stops on a page that adds nothing new");
 });
 
 test("401 raises LinkedinAuthError; 429 retries then gives up", async () => {
@@ -182,18 +242,19 @@ test("Retry-After is honoured, up to a minute", async () => {
   assert.deepEqual(waits, [7000, 60000]);
 });
 
-test("changes stops when the next page would not start later", async () => {
+test("changes stops when a page adds no new events", async () => {
   const stuck = fake(() => json({ elements: [{ id: 1 }] }));
-  await assert.rejects(
-    linkedinDataClient({
-      token: "t",
-      fetch: stuck.fetcher,
-      sleep,
-      now: () => new Date(1000),
-    }).changes(new Date(100)),
-    /did not move forward/,
+  const events = await linkedinDataClient({
+    token: "t",
+    fetch: stuck.fetcher,
+    sleep,
+    now: () => new Date(1000),
+  }).changes(new Date(100));
+  assert.deepEqual(
+    events.map((e: any) => e.id),
+    [1],
   );
-  assert.equal(stuck.calls.length, 1);
+  assert.equal(stuck.calls.length, 2);
 });
 
 test("changes never asks for more than the last 28 days", async () => {

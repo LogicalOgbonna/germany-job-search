@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "../../src/lib/db";
 import { NextRequest } from "next/server";
 import { companyKey } from "../../src/lib/linkedin/connections";
+import { hash } from "../../src/lib/domain";
 import { saveContact } from "../../src/lib/referrals/store";
 import * as referralsRoute from "../../src/app/api/jobs/[id]/referrals/route";
 test("rediscovery is idempotent and preserves edited drafts, suppression and follow-ups", async () => {
@@ -172,6 +173,99 @@ test("LinkedIn connections at the company show on the Referrals tab and save wit
     assert.equal((await get()).connections[0].saved, true);
   } finally {
     await db.job.delete({ where: { id: job.id } });
+    await db.linkedinConnection.delete({ where: { id: connection.id } });
+    await db.$disconnect();
+  }
+});
+
+test("a LinkedIn profile saved by hand in other casing and then added as a connection is one contact", async () => {
+  const key = randomUUID();
+  const slug = `test-li-${key.slice(0, 8)}`;
+  const profileUrl = `https://www.linkedin.com/in/${slug}`;
+  const mixed = `https://www.linkedin.com/in/${slug.toUpperCase()}/`;
+  const jobData = (suffix: string) => ({
+    canonicalKey: `${key}-${suffix}`,
+    title: "Platform Engineer",
+    company: `Synthetic Casing Company ${key.slice(0, 8)}`,
+    location: "Berlin",
+    countries: ["DE"],
+    description: "Synthetic, never contact",
+    applyUrl: `https://example.com/jobs/${key}-${suffix}`,
+    track: "Backend",
+    skills: [],
+    score: 80,
+    reasons: [],
+    contentHash: `${key}-${suffix}`,
+  });
+  const job = await db.job.create({ data: jobData("a") });
+  const other = await db.job.create({ data: jobData("b") });
+  const connection = await db.linkedinConnection.create({
+    data: {
+      profileUrl,
+      name: "Grace Testwell",
+      company: job.company,
+      companyKey: companyKey(job.company),
+      position: "Staff Engineer",
+    },
+  });
+  const origin = "http://localhost:3000";
+  const call = (id: string, body?: unknown) =>
+    referralsRoute[body ? "POST" : "GET"](
+      new NextRequest(`${origin}/api/jobs/${id}/referrals`, {
+        method: body ? "POST" : "GET",
+        headers: { "content-type": "application/json", origin },
+        ...(body ? { body: JSON.stringify(body) } : {}),
+      }),
+      { params: Promise.resolve({ id }) },
+    );
+  const manual = {
+    action: "add",
+    contact: {
+      name: "Grace Testwell",
+      title: "Staff Engineer",
+      email: "",
+      linkedin: mixed,
+      sourceUrl: mixed,
+      sourceNote: "Synthetic, never contact",
+    },
+  };
+  try {
+    assert.equal((await call(job.id, manual)).status, 201);
+    const saved = await db.referral.findMany({ where: { jobId: job.id } });
+    assert.equal(saved.length, 1);
+    assert.equal(saved[0].linkedin, profileUrl, "stored lower-cased");
+    assert.equal(
+      (
+        await call(job.id, {
+          action: "add-connection",
+          connectionId: connection.id,
+        })
+      ).status,
+      201,
+    );
+    assert.equal(await db.referral.count({ where: { jobId: job.id } }), 1);
+
+    // A contact saved before LinkedIn URLs were lower-cased still counts as the same person.
+    const legacy = mixed.replace(/\/$/, "");
+    await db.referral.update({
+      where: { id: saved[0].id },
+      data: { linkedin: legacy, identity: hash(legacy) },
+    });
+    await call(job.id, {
+      action: "add-connection",
+      connectionId: connection.id,
+    });
+    assert.equal(await db.referral.count({ where: { jobId: job.id } }), 1);
+
+    // The same person saved for another job shows as contacted elsewhere, whatever the casing.
+    assert.equal((await call(other.id, manual)).status, 201);
+    const listed = (await (await call(job.id)).json()) as {
+      contacts: { elsewhere: { job: { company: string } }[] }[];
+    };
+    assert.equal(listed.contacts.length, 1);
+    assert.equal(listed.contacts[0].elsewhere.length, 1);
+  } finally {
+    await db.job.deleteMany({ where: { id: { in: [job.id, other.id] } } });
     await db.linkedinConnection.delete({ where: { id: connection.id } });
     await db.$disconnect();
   }

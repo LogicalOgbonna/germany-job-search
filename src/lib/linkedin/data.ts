@@ -42,6 +42,12 @@ function retryAfter(response: Response): number | undefined {
   return Number.isFinite(seconds) ? Math.max(0, seconds) : undefined;
 }
 
+// One key per event: LinkedIn's id, or the whole event when it carries none.
+const eventKey = (event: ChangelogEvent) =>
+  event.id !== undefined ? `id:${event.id}` : `event:${JSON.stringify(event)}`;
+const atTime = (events: ChangelogEvent[], time: number) =>
+  events.filter((event) => (Number(event.processedAt) || 0) === time).length;
+
 export function linkedinDataClient(options: {
   token: string;
   fetch?: typeof fetch;
@@ -106,26 +112,37 @@ export function linkedinDataClient(options: {
       return { rows, complete: false };
     },
     // Events processed at or after `since` (at most 28 days back), oldest first, as LinkedIn
-    // recommends paging them.
+    // recommends paging them. Each page starts at the last page's final processedAt, inclusive,
+    // so events sharing that millisecond are not skipped; `start` steps past the ones already
+    // read there, and events are kept once each by id.
     async changes(since: Date): Promise<ChangelogEvent[]> {
       const events: ChangelogEvent[] = [];
-      let start = Math.max(
+      const seen = new Set<string>();
+      let startTime = Math.max(
         since.getTime(),
         now().getTime() - changelogDays * 86_400_000,
       );
+      let skip = 0;
       for (let page = 0; page < pageLimit; page++) {
         const body = await get(
-          `/memberChangeLogs?q=memberAndApplication&startTime=${start}&count=10`,
+          `/memberChangeLogs?q=memberAndApplication&startTime=${startTime}${skip ? `&start=${skip}` : ""}&count=10`,
         );
         const batch: ChangelogEvent[] = body?.elements ?? [];
-        if (!batch.length) return events;
-        events.push(...batch);
-        const next =
-          Math.max(...batch.map((event) => Number(event.processedAt) || 0)) + 1;
-        // A page whose events carry no later time would be asked for again and again.
-        if (next <= start)
-          throw new Error("LinkedIn changelog did not move forward");
-        start = next;
+        const fresh = batch.filter((event) => {
+          const key = eventKey(event);
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        // Empty, or only events already read: the changelog has nothing later.
+        if (!fresh.length) return events;
+        events.push(...fresh);
+        const last = Math.max(
+          startTime,
+          ...batch.map((event) => Number(event.processedAt) || 0),
+        );
+        skip = atTime(events, last);
+        startTime = last;
       }
       throw new Error("LinkedIn changelog did not stop paging");
     },

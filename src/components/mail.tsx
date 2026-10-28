@@ -386,11 +386,13 @@ function ReviewRow({
   item: ReviewItem;
   notify: (message: string) => void;
 }) {
+  // A LinkedIn message is not proof of an application, so it never starts a card.
+  const fromLinkedin = item.threadId.startsWith("linkedin:");
   const [category, setCategory] = useState(item.category),
     [chosen, setChosen] = useState(
       item.candidates.length === 1
         ? item.candidates[0].applicationId
-        : item.candidates.length
+        : item.candidates.length || fromLinkedin
           ? ""
           : "new",
     ),
@@ -400,7 +402,7 @@ function ReviewRow({
   const filed = passive(category);
   // The candidates are matched again on every load, so a remembered choice can disappear.
   const target =
-    ["new", "none"].includes(chosen) ||
+    (fromLinkedin ? ["none"] : ["new", "none"]).includes(chosen) ||
     item.candidates.some((card) => card.applicationId === chosen)
       ? chosen
       : "";
@@ -585,7 +587,9 @@ function ReviewRow({
                 {card.status.replaceAll("_", " ")})
               </option>
             ))}
-            <option value="new">New card from this email</option>
+            {!fromLinkedin && (
+              <option value="new">New card from this email</option>
+            )}
             <option value="none">No application</option>
           </select>
           <button

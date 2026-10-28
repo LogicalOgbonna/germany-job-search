@@ -8,8 +8,6 @@ const keptFolders = new Set(["INBOX", "ARCHIVE"]);
 // The snapshot's CONTENT is HTML; the changelog's text is plain and is kept as written.
 const fromHtml = (html: string) => capBody(tidy(plain(html)));
 const fromText = (text: string) => capBody(tidy(text));
-const sameName = (a: string, b: string) =>
-  a.trim().toLowerCase() === b.trim().toLowerCase();
 // A canonical LinkedIn /in/ URL, lower-cased as LinkedIn messages carry them, or "". An "@"
 // would make the mail matcher read the URL as an email address.
 const profile = (url: string) =>
@@ -67,17 +65,14 @@ function build(input: {
   };
 }
 
-export function fromSnapshot(
-  row: Record<string, string>,
-  me: string,
-): RawMail | null {
+// The member's own messages are kept here; syncLinkedin drops them, in any name order.
+export function fromSnapshot(row: Record<string, string>): RawMail | null {
   const sender = (row.FROM ?? "").trim();
   const body = fromHtml(row.CONTENT ?? "");
   const at = snapshotDate(row.DATE ?? "");
   if (
     !keptFolders.has(row.FOLDER) ||
     !sender ||
-    sameName(sender, me) ||
     !body ||
     !row["CONVERSATION ID"] ||
     Number.isNaN(at.getTime())
@@ -93,7 +88,7 @@ export function fromSnapshot(
   });
 }
 
-export function fromChangelog(event: any, me: string): RawMail | null {
+export function fromChangelog(event: any): RawMail | null {
   if (event?.resourceName !== "messages" || event.method !== "CREATE")
     return null;
   const activity = event.activity ?? {};
@@ -112,13 +107,7 @@ export function fromChangelog(event: any, me: string): RawMail | null {
     ),
   );
   const at = new Date(Number(activity.createdAt));
-  if (
-    !sender ||
-    sameName(sender, me) ||
-    !conversation ||
-    !body ||
-    Number.isNaN(at.getTime())
-  )
+  if (!sender || !conversation || !body || Number.isNaN(at.getTime()))
     return null;
   return build({
     conversation,

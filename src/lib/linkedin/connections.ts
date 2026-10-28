@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { normalizeCompany } from "../mail/match";
+import { companyTokens, normalizeCompany, sameCompany } from "../mail/match";
 import { linkedinUrl } from "../referrals/domain";
 
 export type ConnectionRecord = {
@@ -18,25 +18,10 @@ export const companyKey = (name: string) => normalizeCompany(name);
 // member's own casing, so both sides are stored and looked up lower-cased.
 const profileKey = (url: string) => (linkedinUrl(url) || url).toLowerCase();
 
-// Keys of the name's opening words, legal suffixes dropped at each cut: "Grafana Labs GmbH"
-// gives grafana, grafanalabs. The last one is the whole name's key.
-function openingKeys(name: string): string[] {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  return words.map((_, i) => companyKey(words.slice(0, i + 1).join(" ")));
-}
-
-// Same rule as the mail matcher for names read from text: equal, or the shorter name
-// (5 characters or more) is the longer one's opening words.
-export function keysMatch(a: string, b: string): boolean {
-  const x = openingKeys(a);
-  const y = openingKeys(b);
-  const kx = x[x.length - 1];
-  const ky = y[y.length - 1];
-  if (!kx || !ky) return false;
-  if (kx === ky) return true;
-  const [short, long] = kx.length <= ky.length ? [kx, y] : [ky, x];
-  return short.length >= 5 && long.includes(short);
-}
+// The mail matcher's rule for names read from text: equal, or the shorter name (5 characters
+// or more) is the longer one's opening words.
+export const keysMatch = (a: string, b: string): boolean =>
+  sameCompany(companyTokens(a), companyTokens(b), false);
 
 export function toConnection(
   row: Record<string, string>,

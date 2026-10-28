@@ -926,3 +926,22 @@ test("only LinkedIn messages are refused as the start of a card", () => {
   );
   assert.equal(startsNoCard(mail()), null);
 });
+
+test("a LinkedIn confirmation never marks a queued or prepared card as submitted", () => {
+  for (const status of ["queued", "prepared"]) {
+    const decision = run(verdict("confirmation"), unique, card(status), {
+      gmailId: "linkedin:abc",
+      fromAddress: "https://www.linkedin.com/in/someone",
+    });
+    assert.deepEqual(decision, {
+      action: "review",
+      reason:
+        "A LinkedIn message is not proof of submission; mark the card as submitted by hand",
+    });
+  }
+  // Mail from a hiring system still does.
+  assert.equal(
+    run(verdict("confirmation"), unique, card("queued")).action,
+    "update",
+  );
+});

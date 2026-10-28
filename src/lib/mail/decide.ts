@@ -168,15 +168,20 @@ function plan(input: Input): Decision {
   if (card.status === "withdrawn" || card.status === "skipped")
     return review(`The card is ${card.status}, so mail does not change it`);
   if (card.status === "queued" || card.status === "prepared")
-    return category === "confirmation" && confidence === "high"
-      ? {
-          action: "update",
-          status: "submitted",
-          submittedAt: mail.receivedAt,
-          ...step,
-          reason: "Confirmation of receipt, card marked as submitted",
-        }
-      : review("The card was never recorded as submitted");
+    // A recruiter's LinkedIn message is their word, not a receipt from the application.
+    return fromLinkedin(mail) && category === "confirmation"
+      ? review(
+          "A LinkedIn message is not proof of submission; mark the card as submitted by hand",
+        )
+      : category === "confirmation" && confidence === "high"
+        ? {
+            action: "update",
+            status: "submitted",
+            submittedAt: mail.receivedAt,
+            ...step,
+            reason: "Confirmation of receipt, card marked as submitted",
+          }
+        : review("The card was never recorded as submitted");
   if (
     category !== "confirmation" &&
     card.submittedAt &&

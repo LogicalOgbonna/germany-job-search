@@ -23,7 +23,7 @@ const row = (over: Record<string, string> = {}) => ({
 });
 
 test("a snapshot row becomes a RawMail with LinkedIn ids", () => {
-  const mail = fromSnapshot(row(), me)!;
+  const mail = fromSnapshot(row())!;
   assert.match(mail.gmailId, /^linkedin:[0-9a-f]{64}$/);
   assert.equal(mail.threadId, "linkedin:2-abc==");
   assert.equal(mail.fromAddress, "https://www.linkedin.com/in/gracehopper");
@@ -35,11 +35,12 @@ test("a snapshot row becomes a RawMail with LinkedIn ids", () => {
   assert.equal(mail.bulk, false);
 });
 
-test("own messages, other folders and empty content are skipped", () => {
-  assert.equal(fromSnapshot(row({ FROM: me }), me), null);
-  assert.equal(fromSnapshot(row({ FOLDER: "SPAM" }), me), null);
-  assert.equal(fromSnapshot(row({ CONTENT: "  " }), me), null);
-  assert.ok(fromSnapshot(row({ FOLDER: "ARCHIVE" }), me));
+// The member's own messages are dropped by syncLinkedin, in any name order (see the
+// integration test), so the mappers keep them.
+test("other folders and empty content are skipped", () => {
+  assert.equal(fromSnapshot(row({ FOLDER: "SPAM" })), null);
+  assert.equal(fromSnapshot(row({ CONTENT: "  " })), null);
+  assert.ok(fromSnapshot(row({ FOLDER: "ARCHIVE" })));
 });
 
 test("the same message read from the changelog gets the same id and thread", () => {
@@ -57,8 +58,8 @@ test("the same message read from the changelog gets the same id and thread", () 
       "author~": { localizedFirstName: "Grace", localizedLastName: "Hopper" },
     },
   };
-  const a = fromSnapshot(row(), me)!;
-  const b = fromChangelog(event, me)!;
+  const a = fromSnapshot(row())!;
+  const b = fromChangelog(event)!;
   assert.equal(b.gmailId, a.gmailId);
   assert.equal(b.threadId, a.threadId);
   assert.equal(b.fromName, "Grace Hopper");
@@ -66,14 +67,11 @@ test("the same message read from the changelog gets the same id and thread", () 
 
 test("changelog events that are not new messages are ignored", () => {
   assert.equal(
-    fromChangelog({ resourceName: "comments", method: "CREATE" }, me),
+    fromChangelog({ resourceName: "comments", method: "CREATE" }),
     null,
   );
   assert.equal(
-    fromChangelog(
-      { resourceName: "messages", method: "DELETE", activity: {} },
-      me,
-    ),
+    fromChangelog({ resourceName: "messages", method: "DELETE", activity: {} }),
     null,
   );
 });
@@ -115,17 +113,15 @@ test("the same message from both sources gets one id, whatever the sender name o
       CONTENT:
         "<p>Ihr Vorstellungsgespr&auml;ch &amp; Termin:</p><p>Montag</p>",
     }),
-    me,
   )!;
   const changelog = fromChangelog(
     event({ text: "Ihr Vorstellungsgespräch & Termin:\nMontag" }),
-    me,
   )!;
   assert.equal(snapshot.gmailId, changelog.gmailId);
 });
 
 test("the fallback subject names nobody", () => {
-  const mail = fromSnapshot(row(), me)!;
+  const mail = fromSnapshot(row())!;
   assert.equal(mail.fromName, "Grace Hopper");
   assert.deepEqual(
     companyEvidence(mail, {
@@ -148,7 +144,6 @@ test("snapshot content decodes every HTML entity", () => {
       CONTENT:
         "<p>Ihr Vorstellungsgespr&auml;ch am Montag &#8211; &#x27;Raum&#x27; f&uuml;r &quot;Sie&quot;</p>",
     }),
-    me,
   )!;
   assert.equal(
     mail.bodyText,
@@ -159,29 +154,27 @@ test("snapshot content decodes every HTML entity", () => {
 test("changelog text is plain: tags and entities in it are kept as written", () => {
   const mail = fromChangelog(
     event({ text: "Use <b>bold</b> if a < b &amp; c" }),
-    me,
   )!;
   assert.equal(mail.bodyText, "Use <b>bold</b> if a < b &amp; c");
 });
 
 test("NUL characters are removed and the 20,000 limit never splits a surrogate pair", () => {
-  assert.equal(fromChangelog(event({ text: "a\u0000b" }), me)!.bodyText, "ab");
+  assert.equal(fromChangelog(event({ text: "a\u0000b" }))!.bodyText, "ab");
   const long = fromChangelog(
     event({ text: `${"a".repeat(19999)}\u{1F600}tail` }),
-    me,
   )!.bodyText;
   assert.equal(long, "a".repeat(19999));
   assert.doesNotMatch(long, /[\ud800-\udbff]$/);
 });
 
 test("a snapshot date without UTC is still read as UTC", () => {
-  const mail = fromSnapshot(row({ DATE: "2026-10-26 18:06:07" }), me)!;
+  const mail = fromSnapshot(row({ DATE: "2026-10-26 18:06:07" }))!;
   assert.equal(mail.receivedAt.toISOString(), "2026-10-26T18:06:07.000Z");
 });
 
 test("profile URLs are canonical LinkedIn /in/ URLs, lower-cased, or empty", () => {
   const url = (value: string) =>
-    fromSnapshot(row({ "SENDER PROFILE URL": value }), me)!.fromAddress;
+    fromSnapshot(row({ "SENDER PROFILE URL": value }))!.fromAddress;
   assert.equal(
     url("https://linkedin.com/in/GraceHopper/"),
     "https://www.linkedin.com/in/gracehopper",
@@ -199,7 +192,6 @@ test("profile URLs are canonical LinkedIn /in/ URLs, lower-cased, or empty", () 
           vanityName,
         },
       }),
-      me,
     )!.fromAddress;
   assert.equal(
     vanity("Grace-Hopper"),
@@ -210,7 +202,7 @@ test("profile URLs are canonical LinkedIn /in/ URLs, lower-cased, or empty", () 
 });
 
 test("the window keeps messages at or after the cutoff", () => {
-  const mail = fromSnapshot(row(), me)!;
+  const mail = fromSnapshot(row())!;
   assert.equal(withinWindow(mail, new Date("2026-10-26T00:00:00Z")), true);
   assert.equal(withinWindow(mail, new Date("2026-10-27T00:00:00Z")), false);
 });

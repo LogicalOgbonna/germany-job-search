@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { companyTokens, sameCompany } from "../src/lib/mail/match";
 import {
   companyKey,
   connectionWrites,
@@ -21,6 +22,23 @@ test("keys match when equal or when one opens the other on a word boundary", () 
     "short names need equality",
   );
   assert.equal(keysMatch("Develop", "Senior Developer"), false);
+});
+
+test("keysMatch is the mail matcher's rule for names read from text", () => {
+  for (const [x, y] of [
+    ["Grafana", "Grafana Labs"],
+    ["Eye", "Eye Security"],
+    ["Personio SE & Co. KG", "Personio"],
+    ["Personio", "Personal Capital"],
+    ["Mercedes", "Mercedes-Benz"],
+  ])
+    assert.equal(
+      keysMatch(x, y),
+      sameCompany(companyTokens(x), companyTokens(y), false),
+    );
+  // The shared rule splits on any punctuation, so a hyphenated name opens on its first part.
+  // The old connections-only rule split on spaces and called these two different companies.
+  assert.equal(keysMatch("Mercedes", "Mercedes-Benz"), true);
 });
 
 test("legal suffixes never decide a match", () => {

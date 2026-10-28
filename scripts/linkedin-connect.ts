@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { execFile } from "node:child_process";
+import { rm } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import { createServer, type ServerResponse } from "node:http";
 import {
@@ -132,6 +133,8 @@ server.on("request", async (request, response) => {
     return;
   }
   answered = true;
+  // Set once the data token is on disk, so a failed data check can take it back.
+  let unchecked: string | null = null;
   try {
     if (params.get("state") !== state)
       throw new Error("The answer did not belong to this sign-in.");
@@ -148,9 +151,12 @@ server.on("request", async (request, response) => {
         clientSecret,
       }),
     );
-    // Saved before the data check, so a slow LinkedIn snapshot never throws away a valid sign-in.
+    // Saved before the data check; a check that fails removes it again below, so the worker
+    // never syncs with a token that was reported as not connected.
     await writeLinkedinToken(linkedinTokenPath(app), token);
+    if (app === "data") unchecked = linkedinTokenPath(app);
     const status = app === "data" ? await checkData(token) : "";
+    unchecked = null;
     await reply(
       response,
       200,
@@ -168,6 +174,7 @@ server.on("request", async (request, response) => {
         .join("\n"),
     );
   } catch (error) {
+    if (unchecked) await rm(unchecked, { force: true });
     await reply(
       response,
       400,

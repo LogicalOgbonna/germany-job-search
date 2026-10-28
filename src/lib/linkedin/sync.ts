@@ -7,12 +7,19 @@ import { mailLive, mentionsHiring, processMessage } from "../mail/store";
 import type { AiClassifier, RawMail } from "../mail/types";
 import { linkedinTokenPath, readLinkedinToken } from "./auth";
 import { companyOfSender, keysMatch, refreshConnections } from "./connections";
-import { linkedinDataClient, type LinkedinDataClient } from "./data";
+import {
+  linkedinDataClient,
+  type LinkedinDataClient,
+  type Snapshot,
+} from "./data";
 import { fromChangelog, fromSnapshot, withinWindow } from "./messages";
 
 const hour = 3600_000;
 const day = 24 * hour;
 const firstWindow = 30 * day;
+// The changelog keeps 28 days, so the inbox snapshot is only needed once the last success is
+// older than this (or there has been none).
+const inboxAfter = 20 * day;
 const leaseMs = 10 * 60_000;
 const realId = "linkedin";
 
@@ -26,7 +33,11 @@ export type LinkedinCounts = {
   ignored: number; // not about an application, or already stored
   failed: number;
 };
-export type LinkedinSkip = "mail-not-live" | "not-connected" | "busy";
+export type LinkedinSkip =
+  "mail-not-live" | "pending-proposals" | "not-connected" | "busy";
+
+const failure = (error: unknown) =>
+  error instanceof Error ? error.message : "LinkedIn check failed";
 
 const nameParts = (name: string) =>
   name
@@ -51,8 +62,8 @@ async function memberName(): Promise<string> {
   }
 }
 
-// A lease that is extended once a minute while a long first run works through its messages,
-// and only while this run still holds it.
+// A lease that is extended at most once a minute while a long first run reads its snapshots
+// and changelog and works through its messages, and only while this run still holds it.
 function keeper(id: string, claimed: Date) {
   let held = claimed;
   return {
@@ -102,8 +113,10 @@ export async function syncLinkedin(
     failed: 0,
   };
   // LinkedIn messages change cards through the same rules as mail, so every check, scheduled
-  // or by hand, waits for the same switch (as npm run mail:sync does).
+  // or by hand, waits for the same switch and for a dry run's proposals (as syncMail does).
   if (!(await mailLive())) return { ...counts, skipped: "mail-not-live" };
+  if (await db.mailMessage.count({ where: { state: "proposed" } }))
+    return { ...counts, skipped: "pending-proposals" };
   const token = options.client
     ? null
     : await readLinkedinToken(linkedinTokenPath("data"));
@@ -119,6 +132,12 @@ export async function syncLinkedin(
   });
   if (!lease.count) return { ...counts, skipped: "busy" };
   const held = keeper(id, claimed);
+  // Called between the long steps: snapshot pages, changelog paging, connection writes and
+  // each message can each take minutes on a first run.
+  const stillHeld = async () => {
+    if (!(await held.renew()))
+      throw new Error("Another LinkedIn check took over.");
+  };
   const sync = await db.linkedinSync.findUniqueOrThrow({ where: { id } });
   try {
     const client =
@@ -129,6 +148,9 @@ export async function syncLinkedin(
     const snapshotDue =
       !sync.lastSnapshotAt ||
       now.valueOf() - sync.lastSnapshotAt.valueOf() > day;
+    const inboxDue =
+      !sync.lastSuccessAt ||
+      now.valueOf() - sync.lastSuccessAt.valueOf() > inboxAfter;
     const me = options.me ?? (await memberName());
     const myName = nameParts(me);
     const isMe = (name: string) => !!myName && nameParts(name) === myName;
@@ -142,23 +164,46 @@ export async function syncLinkedin(
       )
         mails.set(mail.gmailId, mail);
     };
-    let snapshotRead = false;
+    // The daily snapshot counts as taken once CONNECTIONS and (when due) INBOX were both
+    // read; otherwise it is asked for again at the next hourly check.
+    let snapshotTaken = false;
+    let connectionsError: string | null = null;
     if (snapshotDue) {
-      const people = await client.snapshot("CONNECTIONS");
-      // A snapshot cut short still adds and updates connections, but removes none.
-      if (people)
-        counts.connections = await refreshConnections(
-          people.rows,
-          people.complete,
-        );
-      const inbox = await client.snapshot("INBOX");
-      if (inbox) {
-        snapshotRead = true;
-        for (const row of inbox.rows) keep(fromSnapshot(row, me));
+      // A failed connections refresh is recorded but does not stop the message check.
+      let people: Snapshot | null = null;
+      try {
+        people = await client.snapshot("CONNECTIONS");
+      } catch (error) {
+        connectionsError = failure(error);
       }
+      await stillHeld();
+      let peopleRead = false;
+      if (people)
+        try {
+          // A snapshot cut short still adds and updates connections, but removes none.
+          counts.connections = await refreshConnections(
+            people.rows,
+            people.complete,
+          );
+          peopleRead = true;
+        } catch (error) {
+          connectionsError = failure(error);
+        }
+      let inboxRead = !inboxDue;
+      if (inboxDue) {
+        await stillHeld();
+        const inbox = await client.snapshot("INBOX");
+        await stillHeld();
+        if (inbox) {
+          inboxRead = true;
+          for (const row of inbox.rows) keep(fromSnapshot(row));
+        }
+      }
+      snapshotTaken = peopleRead && inboxRead;
     }
-    for (const event of await client.changes(since))
-      keep(fromChangelog(event, me));
+    await stillHeld();
+    for (const event of await client.changes(since)) keep(fromChangelog(event));
+    await stillHeld();
     counts.read = mails.size;
 
     const companies = [
@@ -185,9 +230,11 @@ export async function syncLinkedin(
     const ordered = [...mails.values()].sort(
       (x, y) => x.receivedAt.valueOf() - y.receivedAt.valueOf(),
     );
+    // The oldest message that could not be processed: the next check's window reaches back to
+    // it, and the messages stored meanwhile are skipped by their id.
+    let firstFailed: Date | null = null;
     for (const mail of ordered) {
-      if (!(await held.renew()))
-        throw new Error("Another LinkedIn check took over.");
+      await stillHeld();
       try {
         // 229 of 2,459 real messages carry no profile URL: the name is looked up instead.
         const company = await companyOfSender(mail.fromAddress, mail.fromName);
@@ -215,22 +262,22 @@ export async function syncLinkedin(
           linkedThreads.add(mail.threadId);
       } catch {
         counts.failed++;
+        firstFailed ??= mail.receivedAt;
       }
     }
     await held.release({
-      lastSuccessAt: now,
-      lastError: null,
+      lastSuccessAt: firstFailed ?? now,
+      lastError: connectionsError
+        ? `LinkedIn connections were not refreshed: ${connectionsError}`
+        : null,
       lastCounts: counts,
       nextRunAt: new Date(now.valueOf() + hour),
-      ...(snapshotRead || counts.connections !== null
-        ? { lastSnapshotAt: now }
-        : {}),
+      ...(snapshotTaken ? { lastSnapshotAt: now } : {}),
     });
     return { ...counts, skipped: null };
   } catch (error) {
     await held.release({
-      lastError:
-        error instanceof Error ? error.message : "LinkedIn check failed",
+      lastError: failure(error),
       nextRunAt: new Date(now.valueOf() + hour),
     });
     throw error;

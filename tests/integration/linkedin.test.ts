@@ -28,8 +28,9 @@ import { syncLinkedin } from "../../src/lib/linkedin/sync";
 // synthetic companies, conversation ids and profile URLs. LinkedIn is a fake client in this
 // file and is never called; Claude is a function in this file. The check state lives under
 // its own LinkedinSync id and its own mail live switch, so the real rows are never written.
-// The fake export has no CONNECTIONS (LinkedIn "not ready"): a complete connections snapshot
-// replaces the stored ones, which would remove the member's real connections.
+// The fake CONNECTIONS export is always marked incomplete and lists synthetic people only: a
+// complete connections snapshot replaces the stored ones, which would remove the member's
+// real connections, while an incomplete one only adds and updates the rows it lists.
 const tag = randomUUID().replaceAll("-", "").slice(0, 12);
 const syncId = "linkedin-test";
 const mailCheckId = `linkedintest-${tag}`;
@@ -134,22 +135,77 @@ const knownEvent: ChangelogEvent = {
   },
 };
 
+// One synthetic connection at card A's company, never one of the member's real ones.
+const colleagues = [
+  {
+    "First Name": `Litest${tag}`,
+    "Last Name": "Colleague",
+    URL: profile(3),
+    Company: a,
+    Position: "Software Engineer",
+  },
+];
 const asked: string[] = [];
 const fake = (
   rows: Record<string, string>[],
   events: ChangelogEvent[] = [],
+  options: {
+    // null: LinkedIn has not prepared the domain; "fail": the read throws.
+    connections?: Record<string, string>[] | null | "fail";
+    inbox?: "ready" | null;
+    hook?: (step: string) => Promise<void> | void; // runs as each read starts
+  } = {},
 ): LinkedinDataClient => ({
   snapshot: async (domain: SnapshotDomain) => {
     asked.push(`snapshot:${domain}`);
-    return domain === "INBOX" ? { rows, complete: true } : null;
+    await options.hook?.(`snapshot:${domain}`);
+    if (domain === "INBOX")
+      return options.inbox === null ? null : { rows, complete: true };
+    const people =
+      options.connections === undefined ? colleagues : options.connections;
+    if (people === "fail") throw new Error("LinkedIn answered 502");
+    return people && { rows: people, complete: false };
   },
   changes: async (since: Date) => {
     asked.push("changes");
+    await options.hook?.("changes");
     return events.filter(
       (event) => Number(event.processedAt) >= since.valueOf(),
     );
   },
 });
+// A changelog message from the stored connection at card A's company.
+const fromKnown = (
+  name: string,
+  at: Date,
+  text: string,
+  firstName = `Litest${tag}`,
+): ChangelogEvent => ({
+  resourceName: "messages",
+  method: "CREATE",
+  processedAt: at.valueOf() + 100,
+  activity: {
+    thread: `urn:li:messagingThread:${conversation(name)}`,
+    createdAt: at.valueOf(),
+    content: { content: { string: text } },
+  },
+  processedActivity: {
+    "author~": {
+      localizedFirstName: firstName,
+      localizedLastName: "Sender",
+      vanityName: `test-li-${tag}-1`,
+    },
+  },
+});
+const thread = (name: string) => ({
+  threadId: `linkedin:${conversation(name)}`,
+});
+const state = () =>
+  db.linkedinSync.findUniqueOrThrow({ where: { id: syncId } });
+const setState = (data: {
+  lastSuccessAt?: Date | null;
+  lastSnapshotAt?: Date | null;
+}) => db.linkedinSync.update({ where: { id: syncId }, data });
 // Claude agrees with the rules, with high confidence.
 const reading = (values: Partial<Classification>): Classification => ({
   category: "unrelated",
@@ -183,7 +239,7 @@ const job = (name: string, title: string) => ({
 const ours = { threadId: { startsWith: `linkedin:test-li-${tag}-` } };
 const stored = (item: Record<string, string>) =>
   db.mailMessage.findUniqueOrThrow({
-    where: { gmailId: fromSnapshot(item, me)!.gmailId },
+    where: { gmailId: fromSnapshot(item)!.gmailId },
   });
 
 async function step(name: string, work: () => Promise<void>) {
@@ -225,7 +281,7 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
     [stranger, undefined],
     [nameOnly, b],
   ] as const) {
-    const mail = { ...fromSnapshot(item, me)!, senderCompany };
+    const mail = { ...fromSnapshot(item)!, senderCompany };
     const match = matchMail(mail, await classify(mail, null), realBoard);
     assert.equal(match.kind, "none", "a synthetic message matches a real card");
   }
@@ -285,6 +341,37 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
     );
 
     await step(
+      "0b. a check waits while a mail dry run's proposals wait",
+      async () => {
+        const waiting = await db.mailMessage.create({
+          data: {
+            gmailId: `linkedin:test-li-${tag}-proposed`,
+            threadId: `linkedin:${conversation("proposed")}`,
+            fromAddress: "",
+            subject: "Synthetic proposal",
+            receivedAt: daysAgo(1),
+            bodyText: "Synthetic, never applied.",
+            category: "unrelated",
+            confidence: "high",
+            decidedBy: "test",
+            state: "proposed",
+          },
+        });
+        try {
+          const result = await run(fake(inbox, [knownEvent]));
+          assert.equal(result.skipped, "pending-proposals");
+          assert.deepEqual(asked, []);
+          assert.equal(
+            await db.linkedinSync.count({ where: { id: syncId } }),
+            0,
+          );
+        } finally {
+          await db.mailMessage.delete({ where: { id: waiting.id } });
+        }
+      },
+    );
+
+    await step(
       "a profile URL that is not stored is not looked up by name",
       async () => {
         assert.equal(await companyOfSender("", `Litest${tag} Namesake`), b);
@@ -312,8 +399,13 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
           "snapshot:INBOX",
           "changes",
         ]);
-        // Not ready on LinkedIn's side: nothing was replaced.
-        assert.equal(result.connections, null);
+        // The synthetic connection was added; an incomplete snapshot removes none.
+        assert.equal(result.connections, 1);
+        assert.equal(
+          (await companyOfSender(profile(3), ""))?.valueOf(),
+          a,
+          "the connection snapshot was not stored",
+        );
         // known (twice, one id), stranger, nameOnly, personal; not the own reply, not the old one.
         assert.equal(result.read, 4);
         assert.equal(result.candidates, 3);
@@ -327,10 +419,10 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
             .status,
           "rejected",
         );
-        const fromKnown = await stored(known);
-        assert.match(fromKnown.gmailId, /^linkedin:/);
-        assert.equal(fromKnown.applicationId, appA.id);
-        assert.equal(fromKnown.senderCompany, a);
+        const byKnown = await stored(known);
+        assert.match(byKnown.gmailId, /^linkedin:/);
+        assert.equal(byKnown.applicationId, appA.id);
+        assert.equal(byKnown.senderCompany, a);
 
         const fromStranger = await stored(stranger);
         assert.equal(fromStranger.state, "needs_review");
@@ -365,14 +457,13 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
         // 4. The personal message and the member's own reply are not stored.
         assert.equal(await db.mailMessage.count({ where: ours }), 3);
 
-        const state = await db.linkedinSync.findUniqueOrThrow({
-          where: { id: syncId },
-        });
-        assert.equal(state.leaseUntil, null);
-        assert.equal(state.lastError, null);
-        assert.equal(state.lastSuccessAt?.valueOf(), now.valueOf());
-        assert.equal(state.lastSnapshotAt?.valueOf(), now.valueOf());
-        assert.equal(state.nextRunAt.valueOf(), now.valueOf() + 3600_000);
+        const after = await state();
+        assert.equal(after.leaseUntil, null);
+        assert.equal(after.lastError, null);
+        assert.equal(after.lastSuccessAt?.valueOf(), now.valueOf());
+        // Both CONNECTIONS and INBOX were read.
+        assert.equal(after.lastSnapshotAt?.valueOf(), now.valueOf());
+        assert.equal(after.nextRunAt.valueOf(), now.valueOf() + 3600_000);
       },
     );
 
@@ -394,6 +485,127 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
     });
 
     await step(
+      "connections are read daily; the inbox only when the last success is over 20 days old",
+      async () => {
+        // A day-old snapshot and a recent success: the changelog covers the window.
+        await setState({
+          lastSnapshotAt: daysAgo(2),
+          lastSuccessAt: daysAgo(1),
+        });
+        asked.length = 0;
+        let result = await run(fake(inbox, [knownEvent]));
+        assert.deepEqual(asked, ["snapshot:CONNECTIONS", "changes"]);
+        assert.equal(result.connections, 1);
+        assert.equal((await state()).lastSnapshotAt?.valueOf(), now.valueOf());
+
+        // CONNECTIONS not ready: no snapshot is recorded, so the next hour asks again.
+        await setState({
+          lastSnapshotAt: daysAgo(2),
+          lastSuccessAt: daysAgo(1),
+        });
+        asked.length = 0;
+        result = await run(fake(inbox, [knownEvent], { connections: null }));
+        assert.deepEqual(asked, ["snapshot:CONNECTIONS", "changes"]);
+        assert.equal(result.connections, null);
+        let after = await state();
+        assert.equal(after.lastSnapshotAt?.valueOf(), daysAgo(2).valueOf());
+        assert.equal(after.lastSuccessAt?.valueOf(), now.valueOf());
+
+        // Last success 21 days ago: the inbox is read too. Not ready: asked again next hour.
+        await setState({
+          lastSnapshotAt: daysAgo(2),
+          lastSuccessAt: daysAgo(21),
+        });
+        asked.length = 0;
+        result = await run(fake(inbox, [knownEvent], { inbox: null }));
+        assert.deepEqual(asked, [
+          "snapshot:CONNECTIONS",
+          "snapshot:INBOX",
+          "changes",
+        ]);
+        assert.equal(result.connections, 1);
+        after = await state();
+        assert.equal(after.lastSnapshotAt?.valueOf(), daysAgo(2).valueOf());
+      },
+    );
+
+    await step(
+      "a failed connections refresh is recorded and the messages are still processed",
+      async () => {
+        await setState({
+          lastSnapshotAt: daysAgo(2),
+          lastSuccessAt: daysAgo(1),
+        });
+        const late = fromKnown("late", daysAgo(0.5), turnedDown(a));
+        const result = await run(
+          fake(inbox, [knownEvent, late], { connections: "fail" }),
+        );
+        assert.equal(result.skipped, null);
+        assert.equal(result.connections, null);
+        assert.equal(result.candidates, 2);
+        assert.equal(await db.mailMessage.count({ where: thread("late") }), 1);
+        const after = await state();
+        assert.match(
+          after.lastError ?? "",
+          /connections.*LinkedIn answered 502/,
+        );
+        assert.equal(after.lastSuccessAt?.valueOf(), now.valueOf());
+        assert.equal(after.lastSnapshotAt?.valueOf(), daysAgo(2).valueOf());
+        assert.equal(after.leaseUntil, null);
+      },
+    );
+
+    await step(
+      "a message that fails is read again by the next check",
+      async () => {
+        // Postgres refuses a NUL in the sender's name, so storing this message throws. The id
+        // depends on the conversation, time and text, so the clean copy below is the same message.
+        const at = new Date(now.valueOf() - 30 * 60_000);
+        const text = turnedDown(a);
+        const broken = fromKnown("retry", at, text, `Litest${tag}\u0000`);
+        const first = await run(fake(inbox, [broken]));
+        assert.equal(first.failed, 1);
+        assert.equal(await db.mailMessage.count({ where: thread("retry") }), 0);
+        // The window of the next check starts an hour before the failed message.
+        assert.equal((await state()).lastSuccessAt?.valueOf(), at.valueOf());
+
+        const second = await run(fake(inbox, [fromKnown("retry", at, text)]));
+        assert.equal(second.failed, 0);
+        assert.equal(second.candidates, 1);
+        assert.equal(await db.mailMessage.count({ where: thread("retry") }), 1);
+        assert.equal((await state()).lastSuccessAt?.valueOf(), now.valueOf());
+      },
+    );
+
+    await step("a long fetch keeps the lease", async () => {
+      await setState({ lastSnapshotAt: daysAgo(2), lastSuccessAt: daysAgo(1) });
+      // The lease's clock is moved past the 10-minute lease while CONNECTIONS is read.
+      const realNow = Date.now;
+      let shift = 0;
+      let leaseAtChanges: Date | null = null;
+      Date.now = () => realNow() + shift;
+      try {
+        const result = await run(
+          fake(inbox, [knownEvent], {
+            hook: async (at) => {
+              if (at === "snapshot:CONNECTIONS") shift = 11 * 60_000;
+              if (at === "changes") leaseAtChanges = (await state()).leaseUntil;
+            },
+          }),
+        );
+        assert.equal(result.skipped, null);
+        const held = leaseAtChanges as Date | null;
+        assert.ok(
+          held && held.valueOf() > Date.now(),
+          "the lease ran out while the snapshot was read",
+        );
+      } finally {
+        Date.now = realNow;
+      }
+      assert.equal((await state()).leaseUntil, null);
+    });
+
+    await step(
       "a failed LinkedIn read is recorded and frees the lease",
       async () => {
         const broken: LinkedinDataClient = {
@@ -403,11 +615,9 @@ test("LinkedIn sync against the local database, synthetic rows only", async () =
           },
         };
         await assert.rejects(run(broken), /LinkedIn answered 500/);
-        const state = await db.linkedinSync.findUniqueOrThrow({
-          where: { id: syncId },
-        });
-        assert.equal(state.lastError, "LinkedIn answered 500");
-        assert.equal(state.leaseUntil, null);
+        const after = await state();
+        assert.equal(after.lastError, "LinkedIn answered 500");
+        assert.equal(after.leaseUntil, null);
       },
     );
 

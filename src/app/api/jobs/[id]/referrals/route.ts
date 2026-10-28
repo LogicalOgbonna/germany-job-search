@@ -25,17 +25,22 @@ export async function GET(
       db.job.findUnique({ where: { id: jobId }, select: { company: true } }),
     ]);
     const connections = job ? await connectionsAt(job.company) : [];
-    // Saved contacts keep linkedinUrl()'s casing and connections are stored lower-cased,
-    // so compare both lower-cased.
+    // Contacts saved before LinkedIn URLs were lower-cased keep their casing, so profiles are
+    // always compared lower-cased.
     const savedProfiles = new Set(
       contacts.map((c) => c.linkedin.toLowerCase()).filter(Boolean),
     );
     const emails = contacts.map((c) => c.email).filter(Boolean),
-      profiles = contacts.map((c) => c.linkedin).filter(Boolean);
+      profiles = [...savedProfiles];
     const elsewhere = await db.referral.findMany({
       where: {
         jobId: { not: jobId },
-        OR: [{ email: { in: emails } }, { linkedin: { in: profiles } }],
+        OR: [
+          { email: { in: emails } },
+          ...profiles.map((profile) => ({
+            linkedin: { equals: profile, mode: "insensitive" as const },
+          })),
+        ],
       },
       select: {
         email: true,
@@ -50,7 +55,8 @@ export async function GET(
         elsewhere: elsewhere.filter(
           (o) =>
             (c.email && o.email === c.email) ||
-            (c.linkedin && o.linkedin === c.linkedin),
+            (c.linkedin &&
+              o.linkedin.toLowerCase() === c.linkedin.toLowerCase()),
         ),
       })),
       search,

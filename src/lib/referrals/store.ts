@@ -11,10 +11,19 @@ export async function saveContact(
 ) {
   const job = await db.job.findUniqueOrThrow({ where: { id: jobId } });
   const email = contact.email.toLowerCase();
-  const linkedin = linkedinUrl(contact.linkedin);
+  // LinkedIn profile paths are case-insensitive, and connections are stored lower-cased.
+  const linkedin = linkedinUrl(contact.linkedin).toLowerCase();
   const identity = hash(
     email || linkedin || `${contact.name.toLowerCase()}:${contact.sourceUrl}`,
   );
+  // A contact saved before LinkedIn URLs were lower-cased has its identity from the casing
+  // it was entered with: it is the same person, so it is returned untouched, as upsert does.
+  if (!email && linkedin) {
+    const earlier = await db.referral.findFirst({
+      where: { jobId, linkedin: { equals: linkedin, mode: "insensitive" } },
+    });
+    if (earlier) return earlier;
+  }
   return db.referral.upsert({
     where: { jobId_identity: { jobId, identity } },
     create: {

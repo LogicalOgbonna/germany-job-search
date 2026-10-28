@@ -4,6 +4,8 @@ import type { LinkedinApp } from "./callback";
 
 const authEndpoint = "https://www.linkedin.com/oauth/v2/authorization";
 const tokenEndpoint = "https://www.linkedin.com/oauth/v2/accessToken";
+// LinkedIn's member tokens last 60 days; used when the answer leaves expires_in out.
+const defaultLifetimeSeconds = 60 * 86_400;
 
 // Only these scopes are ever requested. w_member_social can publish, so posting code
 // must always show the post and wait for an explicit approval first.
@@ -74,7 +76,8 @@ export async function exchangeCode(input: {
   return {
     accessToken: body.access_token,
     expiresAt: new Date(
-      now.getTime() + (Number(body.expires_in) || 0) * 1000,
+      now.getTime() +
+        (Number(body.expires_in) || defaultLifetimeSeconds) * 1000,
     ).toISOString(),
     scopes: String(body.scope ?? "")
       .split(/[\s,]+/)

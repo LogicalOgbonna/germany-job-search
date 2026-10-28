@@ -68,7 +68,7 @@ const upper = /^[\p{Lu}\d&]/u;
 const day = 86_400_000;
 const nearMiss = 14 * day;
 
-function companyTokens(name: string): string[] {
+export function companyTokens(name: string): string[] {
   const tokens = name
     .replace(/ß/g, "ss")
     .normalize("NFKD")
@@ -91,7 +91,11 @@ export function normalizeCompany(name: string): string {
 // for names read from text ("Grafana" and "Grafana Labs"), anywhere for names read from an
 // address, where words run together ("1komma5grad", "lightspeedhq"). A name found in the
 // middle of another ("develop" in "Senior Developer") is not a match.
-function sameCompany(a: string[], b: string[], fromAddress: boolean): boolean {
+export function sameCompany(
+  a: string[],
+  b: string[],
+  fromAddress: boolean,
+): boolean {
   const x = a.join("");
   const y = b.join("");
   if (!x || !y) return false;

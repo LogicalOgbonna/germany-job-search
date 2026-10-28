@@ -123,3 +123,19 @@ test("tokens are stored privately and read back", async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("a token without expires_in is assumed to last LinkedIn's 60 days", async () => {
+  const fetcher = (async () =>
+    new Response(JSON.stringify({ access_token: "token-1" }), {
+      status: 200,
+    })) as typeof fetch;
+  const token = await exchangeCode({
+    code: "code-1",
+    redirectUri: "http://127.0.0.1:53682/callback",
+    clientId: "client-1",
+    clientSecret: "secret-1",
+    fetch: fetcher,
+    now: new Date("2026-10-28T00:00:00Z"),
+  });
+  assert.equal(token.expiresAt, "2026-12-27T00:00:00.000Z");
+});
