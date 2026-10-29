@@ -37,6 +37,7 @@ These are the highest-priority rules. A tailored CV must be compelling AND truth
 - You MAY add a parenthetical to clarify focus (e.g., "Frontend Engineer (React / TypeScript)") but the base title must remain accurate.
 - Genentech title is "Frontend Engineer", NOT "Frontend Software Engineer" or "Senior Fullstack Engineer."
 - Descasio title is "Senior Frontend Developer", NOT "Staff Frontend Engineer" or "Staff Fullstack Engineer."
+- Wunderflats title is "Senior Software Engineer". Use the confirmed responsibilities in `cv/experience.md`; do not infer frameworks or a CI/CD provider. Its approximately 30% pipeline wait-time reduction is a candidate estimate; retention and booking improvements have no confirmed percentages.
 
 ### 3. Years of Experience Must Be Mathematically Defensible
 - The candidate's career started Mar 2018. As of today, that is 8 years of professional experience.
@@ -49,7 +50,8 @@ These are the highest-priority rules. A tailored CV must be compelling AND truth
   - ActivEdge: Oct 2019 - Sep 2021
   - Founders Lair: Oct 2020 - Feb 2021 (concurrent contract)
   - Descasio: May 2021 - Mar 2023
-  - Genentech: May 2023 - Present
+  - Genentech: May 2023 - Jan 2026
+  - Wunderflats: Apr 2026 - Sep 2026
   - OurNigeria: Feb 2026 - Present
 
 ### 5. Metrics Must Be Real and Consistent

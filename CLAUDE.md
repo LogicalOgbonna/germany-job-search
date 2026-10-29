@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Candidate Contact
 - **Email:** arinzeogbo@gmail.com
 - **LinkedIn:** https://linkedin.com/in/arinze-ogbonna
+- Dashboard document contact details are in `cv/contact.json`; name, phone and Berlin location were restored from the user-supplied base CV on 5 October 2026.
 
 Use these in CV headers, cover letter headers, and any generated application documents.
 
@@ -13,6 +14,12 @@ Use these in CV headers, cover letter headers, and any generated application doc
 A job application management system that automates CV generation, cover letter creation, job searching, and interview preparation. Documents are tailored per job description while enforcing strict honesty rules.
 
 ## Commands
+
+The repository also contains a Next.js dashboard. Run `npm run setup` once (Docker Desktop required), then `npm run dev` to start both the loopback web server and the BullMQ worker. See README.md for ports, imports, tests, and storage.
+
+Dashboard code is in `src/`, the database schema/migrations in `prisma/`, and operational scripts in `scripts/`. `npm test` checks parsing/domain rules, `npm run test:integration` uses and removes synthetic database records, and `npm run test:browser` exercises the running local app without submitting anything to employers.
+
+Imported job files are discoveries, never proof of applications. Daily progress counts explicit submission records in Europe/Berlin. Keep generated documents grounded in the source files below and never alter submitted document snapshots. Generated CVs must retain the full verified role bullets, summary, categorized competencies, role technologies, project context, and education. Tailor by prioritizing evidence, not by capping jobs at two bullets. Follow the base PDF’s Times New Roman layout and allow additional pages for the complete history. Do not treat a failed/partial fetch as proof that a vacancy is closed.
 
 ```bash
 # Generate PDF from HTML (requires puppeteer)
@@ -59,6 +66,6 @@ HTML → PDF conversion uses Puppeteer with A4 format, zero margins (CSS handles
 - Genentech title is "Frontend Engineer" (not "Frontend Software Engineer").
 - Descasio title is "Senior Frontend Developer" (not "Staff Frontend Engineer").
 - OurNigeria is listed under "Projects" as "Senior Engineer". Never label it "Open Source" or "Side Project". Website only (ournigeria.ng), no GitHub link.
-- Python is "Personal projects" only — no production Python/Django claims.
+- Python: professional use is limited to Genentech, for the RAG pipeline and backend of the chat widget (LangChain, LangGraph, Chroma, LangSmith), confirmed by the user on 13 October 2026. Everything else is personal projects. No years-of-Python claims, and no Django, FastAPI, or model-training claims.
 - No em dashes in generated documents — use commas instead.
 - CV and cover letter for the same job must have identical titles, dates, metrics, and claims.
