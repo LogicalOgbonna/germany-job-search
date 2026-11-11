@@ -4,13 +4,28 @@ import { readProfile } from "../profile";
 import { hash } from "../domain";
 import { contactPriority, linkedinUrl, type FoundContact } from "./domain";
 import { discoverPublic } from "./discovery";
-export async function saveContact(jobId: string, contact: FoundContact) {
+export async function saveContact(
+  jobId: string,
+  contact: FoundContact,
+  options: { connected?: boolean } = {},
+) {
   const job = await db.job.findUniqueOrThrow({ where: { id: jobId } });
   const email = contact.email.toLowerCase();
-  const linkedin = linkedinUrl(contact.linkedin);
+  // LinkedIn profile paths are case-insensitive, and connections are stored lower-cased.
+  const linkedin = linkedinUrl(contact.linkedin).toLowerCase();
   const identity = hash(
     email || linkedin || `${contact.name.toLowerCase()}:${contact.sourceUrl}`,
   );
+  // A LinkedIn profile names one person, so it is looked up first, whatever its casing and
+  // whether or not an email came with it: a contact saved before LinkedIn URLs were
+  // lower-cased has its identity from the casing it was entered with, or from an email added
+  // later. It is the same person, so it is returned untouched, as upsert does.
+  if (linkedin) {
+    const earlier = await db.referral.findFirst({
+      where: { jobId, linkedin: { equals: linkedin, mode: "insensitive" } },
+    });
+    if (earlier) return earlier;
+  }
   return db.referral.upsert({
     where: { jobId_identity: { jobId, identity } },
     create: {
@@ -20,7 +35,7 @@ export async function saveContact(jobId: string, contact: FoundContact) {
       jobId,
       identity,
       priority: contactPriority(contact.title || contact.sourceNote),
-      drafts: makeDrafts(job, contact, await readProfile()),
+      drafts: makeDrafts(job, contact, await readProfile(), options),
     },
     update: {},
   });

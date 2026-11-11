@@ -10,5 +10,5 @@ node_modules
 *.tsbuildinfo
 # Personal application material stays local (repo is public). Files already tracked under jobs/ stay tracked.
 cv/contact.json
-content/
-jobs/
+/content/
+/jobs/

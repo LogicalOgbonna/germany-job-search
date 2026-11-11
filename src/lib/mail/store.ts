@@ -10,7 +10,7 @@ import {
 import type { ParsedInterview } from "../interviews/types";
 import { aiClassifier } from "./ai";
 import { classify, confirm } from "./classify";
-import { decide, needsSecondReader } from "./decide";
+import { decide, needsSecondReader, startsNoCard } from "./decide";
 import {
   gmailClient,
   MailAuthError,
@@ -63,6 +63,8 @@ const abortAfter = 5;
 // so only the forms that belong to hiring count.
 const keywords =
   /\b(?:applications?|applicants?|applying|applied|candidacy|your candidature|candidate|other candidates|interviews?|assessments?|coding challenge|take[- ]home|job offer|offer letter)\b|bewerbung|beworben|stellenangebot|vorstellungsgespr[aä]ch|kennenlerngespr[aä]ch|absage|zusage/i;
+// LinkedIn messages rarely have a subject, so their body is checked with the same words.
+export const mentionsHiring = (text: string) => keywords.test(text);
 // The categories that move a card along (classify.ts puts these to both readers).
 const stages = [
   "rejection",
@@ -252,6 +254,7 @@ const toMail = (row: Row): RawMail => ({
   receivedAt: row.receivedAt,
   bodyText: row.bodyText ?? "",
   fromMe: row.fromMe,
+  ...(row.senderCompany ? { senderCompany: row.senderCompany } : {}),
 });
 // `agreed` has no column either; `decidedBy` records how the two readers stood:
 // "<rule>+ai" agreed, "<rule> vs ai:<category>" split, "ai" Claude alone, "user" a person.
@@ -285,6 +288,7 @@ const mailFields = (mail: RawMail) => ({
   receivedAt: mail.receivedAt,
   bodyText: mail.bodyText,
   fromMe: mail.fromMe,
+  senderCompany: mail.senderCompany ?? null,
 });
 const verdictFields = (classification: Classification) => ({
   category: classification.category,
@@ -2063,6 +2067,8 @@ export async function resolveReview(
       return;
     }
     if (input.applicationId === "new") {
+      const refused = startsNoCard(mail);
+      if (refused) throw new Error(refused);
       const match: MatchResult = {
         kind: "none",
         reason: "new card, your choice",
@@ -2372,6 +2378,8 @@ export async function mailOverview(): Promise<{
     role: string | null;
     reason: string;
     threadId: string;
+    // False when a reviewer may not start a new card from it (startsNoCard: LinkedIn).
+    canStartCard: boolean;
     candidates: Array<{
       applicationId: string;
       company: string;
@@ -2485,6 +2493,7 @@ export async function mailOverview(): Promise<{
         role: row.role,
         reason: row.matchReason,
         threadId: row.threadId,
+        canStartCard: !startsNoCard(toMail(row)),
         interview: offer(row),
         candidates: ids.flatMap((id) => {
           const card = byId.get(id);

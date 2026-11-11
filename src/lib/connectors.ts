@@ -29,19 +29,29 @@ async function request(
   url: string,
   text = false,
   extraHeaders: Record<string, string> = {},
+  sameHostRedirects = 0,
 ): Promise<any> {
-  const response = await fetch(url, {
-    signal: AbortSignal.timeout(20000),
-    redirect: "error",
-    headers: {
-      Accept: text
-        ? "application/xml, text/html;q=0.9, */*;q=0.8"
-        : "application/json",
-      "User-Agent": "PersonalJobDesk/0.1",
-      ...extraHeaders,
-    },
-    cache: "no-store",
-  });
+  let response: Response;
+  for (let hops = 0; ; hops++) {
+    response = await fetch(url, {
+      signal: AbortSignal.timeout(20000),
+      redirect: sameHostRedirects ? "manual" : "error",
+      headers: {
+        Accept: text
+          ? "application/xml, text/html;q=0.9, */*;q=0.8"
+          : "application/json",
+        "User-Agent": "PersonalJobDesk/0.1",
+        ...extraHeaders,
+      },
+      cache: "no-store",
+    });
+    const location = response.headers.get("location");
+    if (response.status < 300 || response.status >= 400 || !location) break;
+    const next = new URL(location, url);
+    if (hops >= sameHostRedirects || next.host !== new URL(url).host)
+      throw new Error("fetch failed: unexpected redirect");
+    url = next.href;
+  }
   if (!response.ok) {
     const retry = response.headers.get("retry-after");
     const seconds = retry
@@ -86,13 +96,17 @@ const codes = (values: unknown[]) => {
   ];
   return found.length ? found : undefined;
 };
-function nextData(html: unknown) {
+// JOIN moved its page state from pageProps.initialState to pageProps.pageData in late October 2026.
+export function nextData(html: unknown) {
   const raw = load(String(html))("script#__NEXT_DATA__").html();
+  let state: any;
   try {
-    return JSON.parse(raw ?? "").props.pageProps.initialState;
-  } catch {
+    const props = JSON.parse(raw ?? "").props.pageProps;
+    state = props.pageData ?? props.initialState;
+  } catch {}
+  if (!state || typeof state !== "object")
     throw new Error("Provider response shape changed");
-  }
+  return state;
 }
 export function parseFeed(
   kind: string,
@@ -294,7 +308,7 @@ export function parseFeed(
           .filter(Boolean)
           .join(" · ") || "Not specified",
       countries: codes([j.country?.iso3166 ?? j.city?.countryCode]),
-      description: plain(j.descriptionHtml ?? ""),
+      description: plain(j.descriptionHtml ?? j.description ?? ""),
       applyUrl: `https://join.com/companies/${source.board}/${j.idParam}`,
       remote: j.workplaceType === "REMOTE",
       publishedAt: date(j.createdAt),
@@ -644,9 +658,12 @@ export async function fetchSource(
           wanted,
           async (j) =>
             nextData(
+              // JOIN answers older listing ids with a 301 to the job's current id.
               await request(
                 `https://join.com/companies/${board}/${encodeURIComponent(j.idParam)}`,
                 true,
+                {},
+                3,
               ),
             ).job,
         ),

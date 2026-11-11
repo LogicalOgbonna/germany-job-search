@@ -25,6 +25,9 @@ export type RawMail = {
   bulk?: boolean;
   // Text of a text/calendar (ICS) part when the message has one. Not stored in the database.
   calendar?: string;
+  // LinkedIn messages only: the sender's current company from the member's stored connection.
+  // The one way a LinkedIn sender (a profile URL, not an address) can confirm a company.
+  senderCompany?: string;
 };
 
 export type Classification = {

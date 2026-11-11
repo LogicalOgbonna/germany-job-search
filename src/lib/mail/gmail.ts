@@ -135,7 +135,8 @@ function parseFrom(raw: string) {
       .trim(),
   };
 }
-const tidy = (text: string) =>
+// Shared with the LinkedIn reader, which stores its messages as mail.
+export const tidy = (text: string) =>
   text
     .replace(/\r\n?/g, "\n")
     // NUL (Postgres refuses it) and the invisible padding of preview lines.
@@ -144,6 +145,12 @@ const tidy = (text: string) =>
     .replace(/ ?\n ?/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+// At most 20,000 characters, without a lone half of a surrogate pair at the cut.
+export const capBody = (text: string) =>
+  text
+    .slice(0, 20000)
+    .replace(/[\ud800-\udbff]$/, "")
+    .trimEnd();
 function content(payload: any) {
   const found: Record<string, string[]> = { "text/plain": [], "text/html": [] };
   let calendar: string | undefined;
@@ -173,10 +180,7 @@ function content(payload: any) {
     tidy(found["text/plain"].join("\n")) ||
     tidy(found["text/html"].map(plain).join("\n"));
   return {
-    bodyText: text
-      .slice(0, 20000)
-      .replace(/[\ud800-\udbff]$/, "")
-      .trimEnd(),
+    bodyText: capBody(text),
     ...(calendar === undefined ? {} : { calendar }),
   };
 }

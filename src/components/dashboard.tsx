@@ -44,11 +44,14 @@ import {
 } from "./interviews";
 import {
   ActionNeeded,
+  LinkedinConnectionCard,
   MailConnection,
   MailReview,
   MailTimeline,
   dueText,
+  useLinkedinStatus,
   useMailOverview,
+  type LinkedinStatus,
   type MailEntry,
   type MailOverview,
 } from "./mail";
@@ -247,6 +250,7 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<EvidenceRole[]>([]);
   const [revision, setRevision] = useState(0);
   const mail = useMailOverview(revision);
+  const linkedin = useLinkedinStatus(revision);
   const searchInput = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
@@ -991,7 +995,12 @@ export default function Dashboard() {
               )}
               {view === "events" && <Events />}
               {view === "sources" && (
-                <Sources data={data} mail={mail} notify={notify} />
+                <Sources
+                  data={data}
+                  mail={mail}
+                  linkedin={linkedin}
+                  notify={notify}
+                />
               )}
               {view === "profile" && (
                 <Profile
@@ -1688,10 +1697,12 @@ function JobDetail({
 function Sources({
   data,
   mail,
+  linkedin,
   notify,
 }: {
   data: Data;
   mail: MailOverview | null;
+  linkedin: LinkedinStatus | null;
   notify: (message: string) => void;
 }) {
   const [error, setError] = useState(""),
@@ -1734,6 +1745,7 @@ function Sources({
         </div>
       </div>
       <MailConnection connection={mail?.connection ?? null} />
+      <LinkedinConnectionCard status={linkedin} />
       <section className="card">
         <div className="section-heading">
           <div>

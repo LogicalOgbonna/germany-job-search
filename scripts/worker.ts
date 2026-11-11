@@ -3,6 +3,7 @@ import { Queue, Worker } from "bullmq";
 import { db } from "../src/lib/db";
 import { seedEventSources, syncEventSource } from "../src/lib/events/store";
 import { syncSource } from "../src/lib/ingestion";
+import { linkedinDue, syncLinkedin } from "../src/lib/linkedin/sync";
 import { readToken } from "../src/lib/mail/gmail";
 import { mailLive, requeueStalePrep, syncMail } from "../src/lib/mail/store";
 
@@ -84,6 +85,20 @@ const worker = new Worker(
             { jobId: "mail-sync", removeOnComplete: true, removeOnFail: true },
           );
       }
+      // LinkedIn messages change cards through the same rules, so they wait for the same
+      // switch and, as the mail trigger above, for any proposals still waiting to be applied
+      // (linkedinDue counts them, and needs the data token). syncLinkedin sets the next run an
+      // hour ahead, also when it skips.
+      if ((await mailLive()) && (await linkedinDue()))
+        await queue.add(
+          "linkedin-sync",
+          {},
+          {
+            jobId: "linkedin-sync",
+            removeOnComplete: true,
+            removeOnFail: true,
+          },
+        );
       // Prep sheets: a run that a stopped worker left "running" is queued again, then the next
       // queued interview is claimed (queued becomes running at once, so no other worker takes
       // it) and handed to a job.
@@ -101,6 +116,7 @@ const worker = new Worker(
       return;
     }
     if (job.name === "mail") return syncMail();
+    if (job.name === "linkedin-sync") return syncLinkedin({ scheduled: true });
     // generatePrep records its own failure on the interview; anything else is logged below.
     if (job.name === "interview-prep") {
       const prep = await loadPrep();

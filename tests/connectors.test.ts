@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { discoverBoard, parseFeed, plain } from "../src/lib/connectors";
+import { discoverBoard, nextData, parseFeed, plain } from "../src/lib/connectors";
 const source = { name: "Acme", board: "acme", region: "global" };
 test("Greenhouse listing timestamps do not mistake updated_at for publication", () => {
   const [job] = parseFeed(
@@ -283,6 +283,20 @@ test("JOIN maps job-page data and converts salary from cents", () => {
     region: "global",
   });
   assert.equal(discoverBoard("https://join.com/talent/acme"), null);
+});
+test("JOIN pages read pageData (current) and initialState (older pages)", () => {
+  const page = (pageProps: unknown) =>
+    `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify({ props: { pageProps } })}</script>`;
+  const jobs = { items: [{ idParam: "1-frontend" }], pagination: { pageCount: 1 } };
+  assert.deepEqual(nextData(page({ pageData: { jobs } })).jobs, jobs);
+  assert.deepEqual(nextData(page({ initialState: { jobs } })).jobs, jobs);
+  assert.throws(() => nextData(page({ messages: {} })), /shape changed/);
+  const [job] = parseFeed(
+    "join",
+    { jobs: [{ id: 1, idParam: "1-frontend", title: "Frontend", description: "<p>React</p>" }] },
+    source,
+  );
+  assert.equal(job.description, "React");
 });
 test("Bundesagentur postings keep the employer link and leave agency ads out", () => {
   const posting = (extra: Record<string, unknown>) => ({

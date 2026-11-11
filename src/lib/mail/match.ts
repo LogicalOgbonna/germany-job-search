@@ -68,7 +68,7 @@ const upper = /^[\p{Lu}\d&]/u;
 const day = 86_400_000;
 const nearMiss = 14 * day;
 
-function companyTokens(name: string): string[] {
+export function companyTokens(name: string): string[] {
   const tokens = name
     .replace(/ß/g, "ss")
     .normalize("NFKD")
@@ -91,7 +91,11 @@ export function normalizeCompany(name: string): string {
 // for names read from text ("Grafana" and "Grafana Labs"), anywhere for names read from an
 // address, where words run together ("1komma5grad", "lightspeedhq"). A name found in the
 // middle of another ("develop" in "Senior Developer") is not a match.
-function sameCompany(a: string[], b: string[], fromAddress: boolean): boolean {
+export function sameCompany(
+  a: string[],
+  b: string[],
+  fromAddress: boolean,
+): boolean {
   const x = a.join("");
   const y = b.join("");
   if (!x || !y) return false;
@@ -359,6 +363,22 @@ function evidence(mail: RawMail, classification: Classification): Evidence[] {
   return found;
 }
 
+// LinkedIn only: the sender's current company from a stored connection. It confirms a card
+// the mail itself names and never names one: an agency recruiter, or someone who has changed
+// jobs since, writes about other companies. It counts only when it is exactly the card's
+// company and the mail's classified company is not another one.
+function connectionConfirms(
+  mail: RawMail,
+  classification: Classification,
+  key: string,
+): boolean {
+  if (mail.fromMe) return false;
+  const sender = usable(tidy(mail.senderCompany ?? ""));
+  if (!sender || sender.join("") !== key) return false;
+  const named = usable(tidy(classification.company ?? ""));
+  return !named || sameCompany(named, sender, false);
+}
+
 // Every company name the mail offers, best first: classification.company, employerFromAddress,
 // sender display name, the sender's own domain when it is not a hiring system or a public
 // mailbox provider, and "at X" / "to X" / "bei X" / "@ X" phrases in the subject.
@@ -616,11 +636,13 @@ export function matchMail(
   const corroborated = (item: BoardApplication) => {
     const tokens = companyTokens(item.company);
     const key = tokens.join("");
-    return found.some(
-      (name) =>
-        sameCompany(tokens, name.tokens, name.fromAddress) &&
-        (name.fromAddress ||
-          (name.tokens.join("") === key && (name.sender || hiringSystem))),
+    return (
+      found.some(
+        (name) =>
+          sameCompany(tokens, name.tokens, name.fromAddress) &&
+          (name.fromAddress ||
+            (name.tokens.join("") === key && (name.sender || hiringSystem))),
+      ) || connectionConfirms(mail, classification, key)
     );
   };
   if (candidates.length === 1) {

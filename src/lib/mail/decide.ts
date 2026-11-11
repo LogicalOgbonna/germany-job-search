@@ -53,6 +53,16 @@ type Input = {
   now: Date;
 };
 
+const fromLinkedin = (mail: RawMail) => mail.gmailId.startsWith("linkedin:");
+
+// Why a reviewer may not start a new card from this mail, or null when they may. A LinkedIn
+// message is a recruiter's word, not proof of an application, and its sender is a person.
+export function startsNoCard(mail: RawMail): string | null {
+  return fromLinkedin(mail)
+    ? "LinkedIn messages cannot start a card. Add the application by hand, then link this message to it."
+    : null;
+}
+
 // True when the decision would change or create a card on a verdict the two readers
 // have not agreed on. A plain receipt from a hiring system that states the role is let
 // through on the rules alone, so the history import can create those cards without Claude.
@@ -118,7 +128,11 @@ function plan(input: Input): Decision {
   if (match.kind === "ambiguous")
     return review(`Several applications could match: ${match.reason}`);
   if (match.kind === "unique" && match.corroborated === false)
-    return review("The sender does not confirm the company");
+    return review(
+      fromLinkedin(mail)
+        ? "The LinkedIn sender's company is unknown or does not match"
+        : "The sender does not confirm the company",
+    );
   const target = categoryStatus[category];
   // Only stage mail carries a next step, and only while it is recent enough to act on.
   const carries =
@@ -130,6 +144,9 @@ function plan(input: Input): Decision {
     nextStepDueAt: carries ? classification.deadline : null,
   };
   if (match.kind === "none") {
+    // Recruiter cold outreach on LinkedIn is not an application.
+    if (fromLinkedin(mail))
+      return review("LinkedIn messages do not create cards");
     const status = category === "confirmation" ? "submitted" : target;
     if (confidence !== "high" || !status)
       return review(
@@ -151,15 +168,20 @@ function plan(input: Input): Decision {
   if (card.status === "withdrawn" || card.status === "skipped")
     return review(`The card is ${card.status}, so mail does not change it`);
   if (card.status === "queued" || card.status === "prepared")
-    return category === "confirmation" && confidence === "high"
-      ? {
-          action: "update",
-          status: "submitted",
-          submittedAt: mail.receivedAt,
-          ...step,
-          reason: "Confirmation of receipt, card marked as submitted",
-        }
-      : review("The card was never recorded as submitted");
+    // A recruiter's LinkedIn message is their word, not a receipt from the application.
+    return fromLinkedin(mail) && category === "confirmation"
+      ? review(
+          "A LinkedIn message is not proof of submission; mark the card as submitted by hand",
+        )
+      : category === "confirmation" && confidence === "high"
+        ? {
+            action: "update",
+            status: "submitted",
+            submittedAt: mail.receivedAt,
+            ...step,
+            reason: "Confirmation of receipt, card marked as submitted",
+          }
+        : review("The card was never recorded as submitted");
   if (
     category !== "confirmation" &&
     card.submittedAt &&

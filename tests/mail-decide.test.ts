@@ -4,6 +4,7 @@ import {
   categoryStatus,
   decide,
   needsSecondReader,
+  startsNoCard,
   stageRank,
 } from "../src/lib/mail/decide";
 import type {
@@ -897,4 +898,50 @@ test("decide does not change its inputs", () => {
   const before = JSON.stringify([state, classification]);
   run(classification, unique, state);
   assert.equal(JSON.stringify([state, classification]), before);
+});
+
+test("a LinkedIn message never creates a card; it waits for review", () => {
+  const decision = run(verdict("interview"), none, null, {
+    gmailId: "linkedin:abc",
+  });
+  assert.equal(decision.action, "review");
+  assert.match(decision.reason, /LinkedIn/);
+});
+
+test("an unconfirmed match from a LinkedIn sender says why in LinkedIn terms", () => {
+  const decision = run(verdict("rejection"), unconfirmed, card("submitted"), {
+    gmailId: "linkedin:abc",
+    fromAddress: "https://www.linkedin.com/in/someone",
+  });
+  assert.deepEqual(decision, {
+    action: "review",
+    reason: "The LinkedIn sender's company is unknown or does not match",
+  });
+});
+
+test("only LinkedIn messages are refused as the start of a card", () => {
+  assert.equal(
+    startsNoCard(mail({ gmailId: "linkedin:abc" })),
+    "LinkedIn messages cannot start a card. Add the application by hand, then link this message to it.",
+  );
+  assert.equal(startsNoCard(mail()), null);
+});
+
+test("a LinkedIn confirmation never marks a queued or prepared card as submitted", () => {
+  for (const status of ["queued", "prepared"]) {
+    const decision = run(verdict("confirmation"), unique, card(status), {
+      gmailId: "linkedin:abc",
+      fromAddress: "https://www.linkedin.com/in/someone",
+    });
+    assert.deepEqual(decision, {
+      action: "review",
+      reason:
+        "A LinkedIn message is not proof of submission; mark the card as submitted by hand",
+    });
+  }
+  // Mail from a hiring system still does.
+  assert.equal(
+    run(verdict("confirmation"), unique, card("queued")).action,
+    "update",
+  );
 });

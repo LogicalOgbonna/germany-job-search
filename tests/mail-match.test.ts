@@ -1076,3 +1076,117 @@ test("a company name inside a longer word or phrase is not a match", () => {
   assert.equal(kind("", verdict({ company: "Super" })), "none");
   assert.equal(kind("Job Opportunity: Application at develop."), "unique");
 });
+
+const linkedin = (over: Partial<RawMail> = {}) =>
+  mail({
+    gmailId: "linkedin:abc",
+    threadId: "linkedin:conv1",
+    fromAddress: "https://www.linkedin.com/in/someone",
+    fromName: "Some One",
+    subject: "LinkedIn message",
+    ...over,
+  });
+
+test("a LinkedIn sender's known company corroborates the card the mail names", () => {
+  const result = matchMail(
+    linkedin({ senderCompany: "Peec AI" }),
+    verdict({ category: "rejection", company: "Peec AI" }),
+    [app()],
+  );
+  assert.deepEqual(result, {
+    kind: "unique",
+    applicationId: "a1",
+    reason: "company",
+    corroborated: true,
+  });
+  // Without the connection the same mail names the card but nothing confirms it.
+  assert.equal(
+    (
+      matchMail(
+        linkedin(),
+        verdict({ category: "rejection", company: "Peec AI" }),
+        [app()],
+      ) as { corroborated?: boolean }
+    ).corroborated,
+    false,
+  );
+});
+
+test("a LinkedIn sender's company never nominates a card on its own", () => {
+  assert.equal(
+    matchMail(
+      linkedin({ senderCompany: "Peec AI" }),
+      verdict({ category: "rejection" }),
+      [app()],
+    ).kind,
+    "none",
+  );
+  // The mail names another company: the connection's company is not a candidate.
+  const other = matchMail(
+    linkedin({ senderCompany: "Peec AI" }),
+    verdict({ category: "rejection", company: "Acme" }),
+    [app()],
+  );
+  assert.deepEqual(other, { kind: "none", reason: "no application at Acme" });
+  assert.deepEqual(
+    companyEvidence(linkedin({ senderCompany: "Peec AI" }), verdict()),
+    [],
+  );
+});
+
+test("an agency recruiter in a conversation linked to a card keeps the thread match", () => {
+  const result = matchMail(
+    linkedin({ senderCompany: "Hays" }),
+    verdict({ category: "interview" }),
+    [app({ threadIds: ["linkedin:conv1"] })],
+  );
+  assert.deepEqual(result, {
+    kind: "unique",
+    applicationId: "a1",
+    reason: "thread",
+    corroborated: true,
+  });
+});
+
+test("a LinkedIn sender's company corroborates only on the card's exact key", () => {
+  const card = app({ company: "Grafana Labs" });
+  const match = (senderCompany: string) =>
+    matchMail(
+      linkedin({ senderCompany }),
+      verdict({ category: "rejection", company: "Grafana Labs" }),
+      [card],
+    ) as { kind: string; corroborated?: boolean };
+  assert.equal(match("Grafana").kind, "unique");
+  assert.equal(match("Grafana").corroborated, false);
+  assert.equal(match("Grafana Labs GmbH").corroborated, true);
+});
+
+test("a LinkedIn sender's company does not corroborate when the mail names another company", () => {
+  const result = matchMail(
+    linkedin({
+      senderCompany: "Peec AI",
+      subject: "Your application at Peec AI",
+    }),
+    verdict({ category: "rejection", company: "Acme" }),
+    [app()],
+  ) as { kind: string; corroborated?: boolean };
+  assert.equal(result.kind, "unique");
+  assert.equal(result.corroborated, false);
+});
+
+test("the LinkedIn fallback subject names no company", () => {
+  assert.deepEqual(
+    companyEvidence(
+      linkedin({ fromName: "Grace Hopper", subject: "LinkedIn message" }),
+      verdict(),
+    ),
+    [],
+  );
+});
+
+test("a LinkedIn sender with no known company names nothing", () => {
+  const result = matchMail(linkedin(), verdict({ category: "rejection" }), [
+    app(),
+  ]);
+  assert.equal(result.kind, "none");
+});
